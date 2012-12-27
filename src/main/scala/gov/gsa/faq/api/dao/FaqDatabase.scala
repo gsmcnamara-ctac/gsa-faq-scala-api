@@ -10,36 +10,35 @@ class FaqDatabase extends DatabaseAdministrator with LogHelper {
 
   val xmlUnmarshallUtils = new XMLUnmarshallUtils[Root](classOf[Root])
 
+  def getXmlRecordsPaths(): Array[String] = { Constants.XML_PATHS }
+
+  def getDatabaseName(): String = { "faq" }
+
+  def getTableNames(): Array[String] = { Array("articles", "topics", "subtopics") }
+
+  def getTableCreationSqls(): Array[String] = {
+    Array(
+      "create table articles (id VARCHAR not null, link VARCHAR, title VARCHAR, body VARCHAR, rank DOUBLE, updated VARCHAR, PRIMARY KEY (id))",
+      "create table topics (id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY, article VARCHAR, name VARCHAR)",
+      "create table subtopics (id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY, article VARCHAR, topic INTEGER, subtopic VARCHAR)"
+    )
+  }
+
   def clearTables(dataSource: DataSource) {
     var jdbcTemplate = new JdbcTemplate(dataSource)
+    for(tableName <- getTableNames()) {
+      jdbcTemplate.execute("delete from " + tableName)
+    }
   }
 
   def loadTables(dataSource: DataSource) {
     var jdbcTemplate = new JdbcTemplate(dataSource)
+    for(xmlPath <- getXmlRecordsPaths()) {
+
+    }
   }
 
   def hasRecords(dataSource: DataSource) : Boolean = {
-    var jdbcTemplate = new JdbcTemplate(dataSource)
-    return false
-  }
-
-  def getTableNames(): Array[String] = {
-    Array("articles", "topics", "subtopics")
-  }
-
-  def getXmlRecordsPaths(): Array[String] = {
-    Constants.XML_PATHS
-  }
-
-  def getDatabaseName(): String = {
-    "faq"
-  }
-
-  def getTableCreationSqls(): Array[String] = {
-    val sqls = new Array[String](3)
-    sqls(0) = "create table articles (id VARCHAR not null, link VARCHAR, title VARCHAR, body VARCHAR, rank DOUBLE, updated VARCHAR, PRIMARY KEY (id))"
-    sqls(1) = "create table topics (id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY, article VARCHAR, name VARCHAR)"
-    sqls(2) = "create table subtopics (id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY, article VARCHAR, topic INTEGER, subtopic VARCHAR)"
-    return sqls
+    if (new JdbcTemplate(dataSource).queryForInt("select count(*) from articles") > 0) true else false
   }
 }
