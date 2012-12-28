@@ -1,20 +1,29 @@
 package gov.gsa.faq.api.dao
 
 import gov.gsa.rest.api.dao.{XMLUnmarshallUtils, DatabaseAdministrator}
-import gov.gsa.faq.api.model.Root
+import gov.gsa.faq.api.model.{Article, Root}
 import gov.gsa.faq.api.{Constants, LogHelper}
 import javax.sql.DataSource
-import org.springframework.jdbc.core.JdbcTemplate
+import org.springframework.jdbc.core.{PreparedStatementCreator, JdbcTemplate}
+import java.sql.{Statement, PreparedStatement, Connection}
+import java.util.Collections
+import org.springframework.jdbc.support.GeneratedKeyHolder
 
 class FaqDatabase extends DatabaseAdministrator with LogHelper {
 
   val xmlUnmarshallUtils = new XMLUnmarshallUtils[Root](classOf[Root])
 
-  def getXmlRecordsPaths(): Array[String] = { Constants.XML_PATHS }
+  def getXmlRecordsPaths(): Array[String] = {
+    Constants.XML_PATHS
+  }
 
-  def getDatabaseName(): String = { "faq" }
+  def getDatabaseName(): String = {
+    "faq"
+  }
 
-  def getTableNames(): Array[String] = { Array("articles", "topics", "subtopics") }
+  def getTableNames(): Array[String] = {
+    Array("articles", "topics", "subtopics")
+  }
 
   def getTableCreationSqls(): Array[String] = {
     Array(
@@ -26,19 +35,74 @@ class FaqDatabase extends DatabaseAdministrator with LogHelper {
 
   def clearTables(dataSource: DataSource) {
     var jdbcTemplate = new JdbcTemplate(dataSource)
-    for(tableName <- getTableNames()) {
-      jdbcTemplate.execute("delete from " + tableName)
+
+    for (tableName <- getTableNames()) {
+      val sql = "delete from " + tableName
+      logger.info("Executing sql statement '" + sql + "'")
+      jdbcTemplate.execute(sql)
     }
   }
 
   def loadTables(dataSource: DataSource) {
-    var jdbcTemplate = new JdbcTemplate(dataSource)
-    for(xmlPath <- getXmlRecordsPaths()) {
+    val jdbcTemplate = new JdbcTemplate(dataSource)
+    for (xmlPath <- getXmlRecordsPaths()) {
 
+      logger.info("Loading tables with records from '" + xmlPath + "'")
+
+      val articles = xmlUnmarshallUtils.init(xmlPath).articles
+
+      for (article: Article <- articles.article) {
+
+        jdbcTemplate.update(new PreparedStatementCreator {
+          def createPreparedStatement(connection: Connection): PreparedStatement = {
+            val ps: PreparedStatement = connection.prepareStatement("insert into articles (id, link, title, body, rank, updated) values (?,?,?,?,?,?) ")
+
+            val articleId = article.id
+
+            ps.setString(1, articleId)
+            ps.setString(2, article.link)
+            ps.setString(3, article.title)
+            ps.setString(4, article.body)
+            ps.setDouble(5, article.rank)
+            ps.setString(6, article.updated)
+
+            if (article.topics != null && article.topics.topic != null) {
+              for (topic <- article.topics.topic) {
+                val keyHolder = new GeneratedKeyHolder()
+                new JdbcTemplate(dataSource).update(new PreparedStatementCreator {
+                  def createPreparedStatement(connection: Connection): PreparedStatement = {
+                    val ps = connection.prepareStatement("insert into topics (article, name) values (?,?)", Statement.RETURN_GENERATED_KEYS)
+                    ps.setString(1, articleId)
+                    ps.setString(2, topic.name)
+                    ps
+                  }
+                }, keyHolder)
+                if (topic.subtopics != null && topic.subtopics != null) {
+                  for (subtopic <- topic.subtopics.subtopic) {
+                    new JdbcTemplate(dataSource).update(new PreparedStatementCreator {
+                      def createPreparedStatement(connection: Connection): PreparedStatement = {
+                        val ps = connection.prepareStatement("insert into subtopics (article, topic, subtopic) values (?,?,?)", Statement.RETURN_GENERATED_KEYS)
+                        val key = keyHolder.getKey
+                        ps.setString(1, articleId)
+                        ps.setInt(2, key.intValue())
+                        ps.setString(3, subtopic)
+                        ps
+                      }
+                    })
+                  }
+                }
+              }
+            }
+            ps
+          }
+        })
+      }
     }
   }
 
-  def hasRecords(dataSource: DataSource) : Boolean = {
-    if (new JdbcTemplate(dataSource).queryForInt("select count(*) from articles") > 0) true else false
+  def hasRecords(dataSource: DataSource): Boolean = {
+    val sql = "select count(*) from articles"
+    logger.info("Executing sql statement '" + sql + "'")
+    if (new JdbcTemplate(dataSource).queryForInt(sql) > 0) true else false
   }
 }
