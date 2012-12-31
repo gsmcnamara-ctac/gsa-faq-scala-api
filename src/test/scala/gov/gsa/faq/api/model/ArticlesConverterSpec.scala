@@ -15,7 +15,13 @@ class ArticlesConverterSpec extends FreeSpec {
     "toArticles should marhsall XML as Articles" in {
       val articlesConverter = new ArticlesConverter()
       val articles: Seq[Article] = articlesConverter.toArticles(Constants.XML_PATH)
-      articles.foreach(println)
+      var article :Article = null
+      articles.foreach{ _article =>
+        if (_article.id=="11924") {
+          article = _article
+        }
+      }
+      assert("http://answers.usa.gov/system/web/view/selfservice/templates/USAgov/egredirect.jsp?p_faq_id=11924" == article.link, article.link)
     }
   }
 }
@@ -38,11 +44,15 @@ class ArticlesConverter {
               val name = (topic \ "name").text
               val subtopicsNode = (topic \ "subtopics").map { subtopics =>
                 val subtopicsList = (subtopics \ "subtopic").map { subtopic =>
-                  (subtopic \ "subtopic").text
+                  subtopic.text
                 }
                 Subtopics(subtopicsList.seq)
               }
-              Topic(name,subtopicsNode.seq(0))
+              if(subtopicsNode.seq!=null && subtopicsNode.seq.size > 0) {
+                Topic(name,subtopicsNode.seq(0))
+              } else {
+                Topic(name,null)
+              }
             }
             Topics(topicList.seq)
           }
@@ -54,11 +64,3 @@ class ArticlesConverter {
     return articlesNode.seq(0).article
   }
 }
-
-//@XmlElement val id: String,
-//@XmlElement val link: String,
-//@XmlElement val title: String,
-//@XmlElement val body: String,
-//@XmlElement val rank: Double,
-//@XmlElement val updated: String,
-//@XmlElement val topics : Topics) {
