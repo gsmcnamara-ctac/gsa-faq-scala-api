@@ -1,16 +1,16 @@
 package gov.gsa.faq.api.model
 
 import javax.xml.bind.annotation.{XmlElement, XmlAccessType, XmlAccessorType, XmlRootElement}
+import collection.mutable.ArrayBuffer
 
-@XmlRootElement(name="article",namespace="")
+@XmlRootElement(name = "article", namespace = "")
 @XmlAccessorType(XmlAccessType.FIELD)
-class Article {
-
-  @XmlElement var id: String = _
-  @XmlElement var link: String = _
-  @XmlElement var title: String = _
-  @XmlElement var body: String = _
-  @XmlElement var rank: Double = _
-  @XmlElement var updated: String = _
-  @XmlElement var topics: Topics = _
+case class Article(
+  @XmlElement val id: String,
+  @XmlElement val link: String,
+  @XmlElement val title: String,
+  @XmlElement val body: String,
+  @XmlElement val rank: Double,
+  @XmlElement val updated: String,
+  @XmlElement val topics : Topics) {
 }

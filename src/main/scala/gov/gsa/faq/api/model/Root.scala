@@ -4,7 +4,8 @@ import javax.xml.bind.annotation.{XmlElement, XmlAccessType, XmlAccessorType, Xm
 
 @XmlRootElement(name="root",namespace="")
 @XmlAccessorType(XmlAccessType.FIELD)
-class Root {
+case class Root(
 
-  @XmlElement var articles: Articles = _
+  @XmlElement var articles: Articles
+) {
 }

@@ -5,7 +5,8 @@ import collection.mutable.ArrayBuffer
 
 @XmlRootElement(name = "subtopics", namespace = "")
 @XmlAccessorType(XmlAccessType.FIELD)
-class Subtopics {
+case class Subtopics (
 
-  @XmlElement var subtopic: ArrayBuffer[String] = _
+  @XmlElement var subtopic: Seq[String]
+) {
 }
