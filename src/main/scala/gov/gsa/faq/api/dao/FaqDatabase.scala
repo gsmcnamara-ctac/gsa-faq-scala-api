@@ -1,7 +1,7 @@
 package gov.gsa.faq.api.dao
 
 import gov.gsa.rest.api.dao.{XMLUnmarshallUtils, DatabaseAdministrator}
-import gov.gsa.faq.api.model.{Article, Root}
+import gov.gsa.faq.api.model.{ArticlesConverter, Article, Root}
 import gov.gsa.faq.api.{Constants, LogHelper}
 import javax.sql.DataSource
 import org.springframework.jdbc.core.{PreparedStatementCreator, JdbcTemplate}
@@ -10,8 +10,6 @@ import java.util.Collections
 import org.springframework.jdbc.support.GeneratedKeyHolder
 
 class FaqDatabase extends DatabaseAdministrator with LogHelper {
-
-  val xmlUnmarshallUtils = new XMLUnmarshallUtils[Root](classOf[Root])
 
   def getXmlRecordsPaths(): Array[String] = {
     Constants.XML_PATHS
@@ -49,9 +47,9 @@ class FaqDatabase extends DatabaseAdministrator with LogHelper {
 
       logger.info("Loading tables with records from '" + xmlPath + "'")
 
-      val articles = xmlUnmarshallUtils.init(xmlPath).articles
+      val articles = new ArticlesConverter().toArticles(xmlPath)
 
-      for (article: Article <- articles.article) {
+      for (article: Article <- articles) {
 
         jdbcTemplate.update(new PreparedStatementCreator {
           def createPreparedStatement(connection: Connection): PreparedStatement = {

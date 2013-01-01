@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app id="restlet-basecamp" version="2.5" xmlns="http://java.sun.com/xml/ns/j2ee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_5.xsd">
+
+	<display-name>faqapi</display-name>
+	
+	<filter>
+		<filter-name>ApiOriginFilter</filter-name>
+		<filter-class>gov.gsa.rest.api.ApiOriginFilter</filter-class>
+	</filter>
+	
+	<filter-mapping>
+		<filter-name>ApiOriginFilter</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>
+	
+	<filter>
+		<filter-name>JsonpFilter</filter-name>
+		<filter-class>gov.gsa.rest.api.JsonpFilter</filter-class>
+	</filter>
+
+	<filter-mapping>
+		<filter-name>JsonpFilter</filter-name>
+		<url-pattern>/contacts.jsonp/*</url-pattern>
+	</filter-mapping>
+	
+	<servlet>
+		<servlet-name>jersey</servlet-name>
+		<servlet-class>com.sun.jersey.spi.container.servlet.ServletContainer</servlet-class>
+		<init-param>
+			<param-name>com.sun.jersey.config.property.packages</param-name>
+			<param-value>gov.gsa.faq.api;gov.gsa.rest.api;org.codehaus.jackson.jaxrs;com.wordnik.swagger.jaxrs;</param-value>
+		</init-param>
+		<init-param>
+			<param-name>com.sun.jersey.spi.container.ContainerRequestFilters</param-name>
+			<param-value>com.sun.jersey.api.container.filter.PostReplaceFilter</param-value>
+		</init-param>
+		<init-param>
+			<param-name>com.sun.jersey.api.json.POJOMappingFeature</param-name>
+			<param-value>true</param-value>
+		</init-param>
+		<init-param>
+			<param-name>api.version</param-name>
+			<param-value>0.1</param-value>
+		</init-param>
+		<init-param>
+			<param-name>swagger.version</param-name>
+			<param-value>1.1.1</param-value>
+		</init-param>
+		<init-param>
+			<param-name>swagger.api.basepath</param-name>
+			<!-- <param-value>http://localhost:9090/faqapi</param-value> -->
+			<param-value>http://ec2-174-129-106-46.compute-1.amazonaws.com:8080/faqapi</param-value>
+		</init-param>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>jersey</servlet-name>
+		<url-pattern>/*</url-pattern>
+	</servlet-mapping>
+	
+</web-app>

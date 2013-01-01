@@ -9,6 +9,7 @@ import java.io.File
 import gov.gsa.faq.api.Constants
 import gov.gsa.rest.api.dao.InMemoryHSQLDatabase
 import org.springframework.jdbc.core.JdbcTemplate
+import org.springframework.jdbc.support.rowset.SqlRowSet
 
 @RunWith(classOf[JUnitRunner])
 class FaqDatabaseSpec extends FeatureSpec with GivenWhenThen with BeforeAndAfter {
@@ -31,43 +32,30 @@ class FaqDatabaseSpec extends FeatureSpec with GivenWhenThen with BeforeAndAfter
 
       val jdbcTemplate = new JdbcTemplate(database.getDataSource)
 
-      assert {
-        val int: Int = jdbcTemplate.queryForInt("select count(*) from articles")
-        Console.print("fsdfsdfsdf" + int)
-        2020 == int
-      }
-    }
+      assert(2020 == jdbcTemplate.queryForInt("select count(*) from articles"))
 
-    //    DataSource dataSource = database.getDataSource();
-    //    JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
-    //    int contactCount = jdbcTemplate.queryForInt("select count(*) from articles");
-    //    assertEquals(2020, contactCount);
-    //
-    //    SqlRowSet rowSet = jdbcTemplate.queryForRowSet("select * from articles where id='9666'");
-    //    assertTrue(rowSet.next());
-    //    assertEquals("9666", rowSet.getString("id"));
-    //    assertEquals("http://answers.usa.gov/system/web/view/selfservice/templates/USAgov/egredirect.jsp?p_faq_id=9666", rowSet.getString("link"));
-    //    assertTrue(rowSet.getString("title").matches("Fish and Wildlife Service:.*Student Employment Programs"));
-    //    assertEquals(IOUtils.toString(new ClassPathResource("9666.body").getInputStream()), rowSet.getString("body"));
-    //    assertEquals("50.43334", rowSet.getString("rank"));
-    //    assertEquals("Nov 26 2012 04:58:24:000PM", rowSet.getString("updated"));
-    //
-    //    rowSet = jdbcTemplate.queryForRowSet("select * from topics where article='9666'");
-    //    assertTrue(rowSet.next());
-    //    assertEquals("9666", rowSet.getString("article"));
-    //    assertEquals("Jobs and Education", rowSet.getString("name"));
-    //    int topicId = rowSet.getInt("id");
-    //    assertTrue(rowSet.next());
-    //    assertEquals("9666", rowSet.getString("article"));
-    //    assertEquals("Fish and Wildlife Service (FWS)", rowSet.getString("name"));
-    //    assertFalse(rowSet.next());
-    //
-    //    rowSet = jdbcTemplate.queryForRowSet("select * from subtopics where topic="+topicId);
-    //    assertTrue(rowSet.next());
-    //    assertEquals(""+topicId, rowSet.getString("topic"));
-    //    assertEquals("Education", rowSet.getString("subtopic"));
-    //    assertTrue(rowSet.next());
-    //    assertEquals(""+topicId, rowSet.getString("topic"));
-    //    assertEquals("Jobs", rowSet.getString("subtopic"));
+      var rowSet = jdbcTemplate.queryForRowSet("select * from articles where id='9666'")
+      assert(rowSet.next())
+      assert("9666" == rowSet.getString("id"), rowSet.getString("id"))
+      assert("http://answers.usa.gov/system/web/view/selfservice/templates/USAgov/egredirect.jsp?p_faq_id=9666" == rowSet.getString("link"), rowSet.getString("link"))
+      assert(rowSet.getString("title").matches("Fish and Wildlife Service:.*Student Employment Programs"), rowSet.getString("title"))
+      assert(50.43334 == rowSet.getDouble("rank"), rowSet.getDouble("rank"))
+      assert("Nov 26 2012 04:58:24:000PM" == rowSet.getString("updated"), rowSet.getString("updated"))
+      assert(Source.fromInputStream(getClass().getResourceAsStream("/9666.body")).getLines().mkString("\n") == rowSet.getString("body"), rowSet.getString("body"))
+
+      rowSet = jdbcTemplate.queryForRowSet("select * from topics where article='9666'")
+      assert(rowSet.next())
+      assert("Jobs and Education" == rowSet.getString("name"), rowSet.getString("name"))
+      val topicId = rowSet.getInt("id")
+      assert(rowSet.next())
+      assert("Fish and Wildlife Service (FWS)" == rowSet.getString("name"), rowSet.getString("name"))
+      assert(!rowSet.next())
+
+      rowSet = jdbcTemplate.queryForRowSet("select * from subtopics where topic="+topicId)
+      assert(rowSet.next())
+      assert("Education" == rowSet.getString("subtopic"))
+      assert(rowSet.next())
+      assert("Jobs" == rowSet.getString("subtopic"))
+    }
   }
 }
