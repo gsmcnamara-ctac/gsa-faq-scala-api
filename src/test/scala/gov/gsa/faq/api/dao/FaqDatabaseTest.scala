@@ -12,7 +12,7 @@ import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.jdbc.support.rowset.SqlRowSet
 
 @RunWith(classOf[JUnitRunner])
-class FaqDatabaseSpec extends FeatureSpec with GivenWhenThen with BeforeAndAfter {
+class FaqDatabaseTest extends FeatureSpec with GivenWhenThen with BeforeAndAfter {
 
   var database: InMemoryHSQLDatabase = _
 

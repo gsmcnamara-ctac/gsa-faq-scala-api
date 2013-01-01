@@ -83,6 +83,8 @@
 
     <build>
         <finalName>${final.name}</finalName>
+        <testSourceDirectory>src/test/scala</testSourceDirectory>
+        <sourceDirectory>src/main/scala</sourceDirectory>
         <plugins>
             <plugin>
                 <groupId>org.scala-tools</groupId>
@@ -101,6 +103,32 @@
                                 <arg>macroman</arg>
                             </args>
                         </configuration>
+                    </execution>
+                    <execution>
+                        <id>compile-tests-scala</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>testCompile</goal>
+                        </goals>
+                        <configuration>
+                            <args>
+                                <arg>-encoding</arg>
+                                <arg>macroman</arg>
+                            </args>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>surefire-test</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>test</goal>
+                        </goals>
                     </execution>
                 </executions>
             </plugin>

@@ -8,7 +8,7 @@ import org.scalatest.junit.JUnitRunner
 import collection.immutable.Range.Double
 
 @RunWith(classOf[JUnitRunner])
-class ArticlesConverterSpec extends FreeSpec {
+class ArticlesConverterTest extends FreeSpec {
 
   "ArticlesConverter" - {
 
