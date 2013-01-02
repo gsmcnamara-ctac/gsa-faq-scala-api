@@ -45,11 +45,12 @@ class ArticlesResourceTest extends FeatureSpec with BeforeAndAfter {
     scenario("no query params, result filters or sorts") {
       when(rangeFinder.getRange(2020, "items=1-1999")).thenReturn(new gov.gsa.rest.api.Range(1, 1999, 2020))
 
-      val response : Response = articlesResource.getResource(null, null, null,"items=1-1999");
+      val response : Response = articlesResource.getResource(null, null, null,"items=1-1999")
       val metadata : MultivaluedMap[String,Object] = response.getMetadata()
       assert("1-1999/2020" == metadata.get("X-Content-Range").get(0))
 
-      var articles = response.getEntity().asInstanceOf[Articles].article
+      val articles = response.getEntity().asInstanceOf[Articles].article
+      assert(1999 == articles.size, articles.size)
 
 //      Articles _articles = (Articles) response.getEntity();
 //      List<Article> articles = _articles.getArticles();
@@ -109,7 +110,7 @@ trait ArticlesResource extends RestResourceUtil with RestAPI with LogHelper {
         if (range == null) {
           range = new gov.gsa.rest.api.Range(1, articles.size, articles.size)
         }
-        for(i <- range.start until range.end) {
+        for(i <- range.start-1 until range.end) {
           articleList += articles(i)
         }
       }
