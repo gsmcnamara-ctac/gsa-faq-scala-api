@@ -2,10 +2,8 @@ package gov.gsa.faq.api.model
 
 import org.scalatest.FreeSpec
 import gov.gsa.faq.api.Constants
-import collection.mutable.ArrayBuffer
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
-import collection.immutable.Range.Double
 
 @RunWith(classOf[JUnitRunner])
 class ArticlesConverterTest extends FreeSpec {

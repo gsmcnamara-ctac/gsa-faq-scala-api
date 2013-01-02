@@ -2,14 +2,13 @@ package gov.gsa.faq.api.dao
 
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
-import org.scalatest.{FeatureSpec, GivenWhenThen, BeforeAndAfter}
+import org.scalatest.{FeatureSpec, BeforeAndAfter}
 import io.Source
 import org.apache.commons.io.FileUtils
 import java.io.File
 import gov.gsa.faq.api.Constants
 import gov.gsa.rest.api.dao.InMemoryHSQLDatabase
 import org.springframework.jdbc.core.JdbcTemplate
-import org.springframework.jdbc.support.rowset.SqlRowSet
 
 @RunWith(classOf[JUnitRunner])
 class FaqDatabaseTest extends FeatureSpec with BeforeAndAfter {
