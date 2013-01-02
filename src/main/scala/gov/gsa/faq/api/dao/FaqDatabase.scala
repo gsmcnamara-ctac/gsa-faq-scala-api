@@ -61,7 +61,7 @@ class FaqDatabase extends DatabaseAdministrator with LogHelper {
             ps.setString(2, article.link)
             ps.setString(3, article.title)
             ps.setString(4, article.body)
-            ps.setDouble(5, article.rank)
+            ps.setDouble(5, article.rank.toDouble)
             ps.setString(6, article.updated)
 
             if (article.topics != null && article.topics.topic != null) {

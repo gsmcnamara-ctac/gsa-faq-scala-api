@@ -10,7 +10,7 @@ case class Article(
   @XmlElement val link: String,
   @XmlElement val title: String,
   @XmlElement val body: String,
-  @XmlElement val rank: Double,
+  @XmlElement val rank: String,
   @XmlElement val updated: String,
   @XmlElement val topics : Topics) {
 }

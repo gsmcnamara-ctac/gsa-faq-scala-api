@@ -23,7 +23,7 @@ class ArticlesConverterTest extends FreeSpec {
       }
       assert("http://answers.usa.gov/system/web/view/selfservice/templates/USAgov/egredirect.jsp?p_faq_id=11924" == article.link, article.link)
       assert("* Employment: Foreign Nationals" == article.title, article.title)
-      assert(217.53334 == article.rank, article.rank)
+      assert(217.53334 == article.rank.toDouble, article.rank)
       assert("Nov 27 2012 07:17:14:000PM" == article.updated, article.updated)
       assert(article.body != null)
       val topics = article.topics.topic

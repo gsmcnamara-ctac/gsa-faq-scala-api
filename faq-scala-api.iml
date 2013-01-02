@@ -31,7 +31,7 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" scope="TEST" name="Maven: org.scalatest:scalatest_2.9.2:1.8" level="project" />
     <orderEntry type="library" name="Maven: org.scala-lang:scala-library:2.9.2" level="project" />
-    <orderEntry type="library" name="Maven: gov.gsa:rest-api-base:1.5" level="project" />
+    <orderEntry type="library" name="Maven: gov.gsa:rest-api-base:1.6-SNAPSHOT" level="project" />
     <orderEntry type="library" name="Maven: commons-dbcp:commons-dbcp:1.4" level="project" />
     <orderEntry type="library" name="Maven: commons-pool:commons-pool:1.5.4" level="project" />
     <orderEntry type="library" name="Maven: org.springframework:spring-jdbc:3.1.0.RELEASE" level="project" />

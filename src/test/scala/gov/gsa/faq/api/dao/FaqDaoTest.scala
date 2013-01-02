@@ -1,16 +1,13 @@
 package gov.gsa.faq.api.dao
 
-import org.scalatest.{BeforeAndAfter, GivenWhenThen, FeatureSpec}
+import org.scalatest.{BeforeAndAfter, FeatureSpec}
 import org.apache.commons.io.FileUtils
 import java.io.File
+import io.Source
 import gov.gsa.faq.api.Constants
-import gov.gsa.rest.api.dao.{ArgumentsParser, InMemoryHSQLDatabase}
-import gov.gsa.faq.api.model.{ResultFilterImpl, QueryParameterImpl, Article, Articles}
-import gov.gsa.rest.api.model.QueryParameter
+import gov.gsa.rest.api.dao._
 import javax.sql.DataSource
-import scala.collection.JavaConversions._
-import org.apache.commons.lang.StringUtils
-import org.springframework.jdbc.core.JdbcTemplate
+import gov.gsa.faq.api.model.Article
 
 class FaqDaoTest extends FeatureSpec with BeforeAndAfter {
 
@@ -26,159 +23,148 @@ class FaqDaoTest extends FeatureSpec with BeforeAndAfter {
     val faqDatabase = new FaqDatabase()
     database = InMemoryHSQLDatabase.getInstance(faqDatabase)
     val dataSource = database.getDataSource()
-    faqDatabase.clearTables(dataSource)
 
     faqDao = new FaqDao(dataSource)
   }
 
   feature("getArticles") {
 
-    scenario("get all the articles from the database") {
+    scenario("all null params (return all articles all data)") {
 
-    }
-  }
-}
+      val articles = faqDao.getArticles(null,null,null)
+      assert(2020 == articles.size, articles.size)
 
-class FaqDao(val dataSource: DataSource) {
-
-  val argumentsParser : ArgumentsParser = new ArgumentsParser()
-  val queryParameter: QueryParameter = new QueryParameterImpl()
-  val allowedResultFilters = new ResultFilterImpl().getResultFilters()
-  var jdbcTemplate : JdbcTemplate = new JdbcTemplate(dataSource)
-
-  def getArticles(queryParamString:String,resultFilterString:String,sortString:String) : Seq[Article] = {
-
-    val queries = argumentsParser.getQueryList(queryParamString, queryParameter)
-    val sorts = argumentsParser.getSorts(sortString)
-
-    var validResultFilters : java.util.List[String] = null
-    if(StringUtils.isEmpty(resultFilterString)) {
-      validResultFilters = allowedResultFilters
-    } else {
-      validResultFilters = getValidResultFilters(resultFilterString)
-    }
-
-    if (queries.size == 0) {
-      buildAllArticles(jdbcTemplate, validResultFilters, sorts)
-    }
-
-    null
-  }
-
-  def buildAllArticles(jdbcTemplate:JdbcTemplate,resultFilters:java.util.List[String],sorts:java.util.List[String]) : Seq[Article] = {
-    null
-  }
-
-  def getValidResultFilters(resultFilterString: String) = {
-    val resultFilters = argumentsParser.getResultFilters(resultFilterString)
-    val validResultFilters = new java.util.ArrayList[String]()
-    resultFilters.foreach { resultFilter =>
-      if (allowedResultFilters.contains(resultFilter)) {
-        validResultFilters += resultFilter
+      var article : Article = null
+      articles.foreach { _article =>
+        if(_article.id == "9666") {
+          article = _article
+        }
       }
+
+      assert(article != null)
+      assert("http://answers.usa.gov/system/web/view/selfservice/templates/USAgov/egredirect.jsp?p_faq_id=9666" == article.link, article.link)
+      assert(article.title.matches("Fish and Wildlife Service:.*Student Employment Programs"))
+      assert("<![CDATA["+Source.fromInputStream(getClass().getResourceAsStream("/9666.body")).getLines().mkString("\n")+"]]" == article.body, article.body)
+      assert(50.43334 == article.rank.toDouble, article.rank)
+      assert("Nov 26 2012 04:58:24:000PM" == article.updated, article.updated)
+
+      val topics = article.topics.topic
+      assert(2 == topics.size, topics.size)
+      assert("Jobs and Education" == topics(0).name)
+      assert("Fish and Wildlife Service (FWS)" == topics(1).name)
+
+      assert("Education" == topics(0).subtopics.subtopic(0))
+      assert("Jobs" == topics(0).subtopics.subtopic(1))
     }
-    validResultFilters
+
+    scenario("with all results filters") {
+
+      val articles = faqDao.getArticles(null, "id|link|title|body|rank|updated|topic", null)
+      assert(2020 == articles.size)
+
+      var article : Article = null
+      articles.foreach { _article =>
+        if(_article.id == "9666") {
+          article = _article
+        }
+      }
+
+      assert(article != null)
+      assert("http://answers.usa.gov/system/web/view/selfservice/templates/USAgov/egredirect.jsp?p_faq_id=9666" == article.link, article.link)
+      assert(article.title.matches("Fish and Wildlife Service:.*Student Employment Programs"))
+      assert("<![CDATA["+Source.fromInputStream(getClass().getResourceAsStream("/9666.body")).getLines().mkString("\n")+"]]" == article.body, article.body)
+      assert(50.43334d == article.rank.toDouble, article.rank)
+      assert("Nov 26 2012 04:58:24:000PM" == article.updated, article.updated)
+
+      val topics = article.topics.topic
+      assert(2 == topics.size, topics.size)
+      assert("Jobs and Education" == topics(0).name)
+      assert("Fish and Wildlife Service (FWS)" == topics(1).name)
+
+      assert("Education" == topics(0).subtopics.subtopic(0))
+      assert("Jobs" == topics(0).subtopics.subtopic(1))
+    }
+
+    scenario("only 'id' result filter") {
+
+      val articles = faqDao.getArticles(null, "id", null)
+      assert(2020 == articles.size)
+
+      var article : Article = null
+      articles.foreach { _article =>
+        if(_article.id == "9666") {
+          article = _article
+        }
+      }
+
+      assert(article!=null)
+
+      assert(null==article.link)
+      assert(null==article.title)
+      assert(null==article.body)
+      assert(null==article.rank)
+      assert(null==article.updated)
+      assert(null==article.topics)
+    }
+
+    scenario("query by body") {
+      val articles = faqDao.getArticles("body::*provide information on available state benefits*", null, null)
+      assert(1==articles.size)
+    }
+
+    scenario("query by topic") {
+      var articles = faqDao.getArticles("topic::Reference and General Government", null, null)
+      assert(520==articles.size)
+      articles = faqDao.getArticles("topic::1_Featured Content USA.gov INTERNAL", null, null)
+      assert(10==articles.size)
+    }
+
+    scenario("query by subtopic") {
+      val articles = faqDao.getArticles("subtopic::Taxes", null, null)
+      assert(111==articles.size)
+    }
+
+    scenario("query by rank") {
+      val articles = faqDao.getArticles("rank:gt:50.0", null, null)
+      assert(1077==articles.size)
+    }
+
+    scenario("query by topic using prefix and sufix wildcard, use id|title|topic as result filter and sort by title") {
+      val articles = faqDao.getArticles("topic::*social*", "id|title|topic", "title")
+
+      var foundTopics = false
+      for (article <- articles) {
+        if(article.topics!=null) {
+          foundTopics = true
+        }
+      }
+      assert(foundTopics)
+    }
+
+    scenario("query by topic using prefix and sufix wildcard, use id|title|topic as result filter and sort by rank") {
+      val articles = faqDao.getArticles("topic::*social*", "id|title|topic", "rank")
+
+      var foundTopics = false
+      for (article <- articles) {
+        if(article.topics!=null) {
+          foundTopics = true
+        }
+      }
+      assert(foundTopics)
+    }
+
+    scenario("query by id") {
+      val articles = faqDao.getArticles("id::9666", null, null)
+      assert(1==articles.size)
+    }
+
+    scenario("sort by descending id") {
+      val articles = faqDao.getArticles(null, null, "-id")
+
+      assert(2020==articles.size)
+      assert("9996"==articles(0).id)
+      assert("10000"==articles(articles.size-1).id)
+    }
   }
 }
 
-//private List<Article> buildAllArticles(JdbcTemplate jdbcTemplate, List<String> resultFilters, List<String> sorts) {
-//
-//String sql = new StringBuilder("select * from articles").append(buildOrderBy(sorts)).toString();
-//
-//log.info(new StringBuilder("Executing the sql statement '").append(sql).append("'").toString());
-//
-//SqlRowSet contactsRowSet = jdbcTemplate.queryForRowSet(sql);
-//
-//List<Article> articles = new ArrayList<Article>();
-//while (contactsRowSet.next()) {
-//Article article = mapRowToContact(jdbcTemplate, contactsRowSet, resultFilters);
-//articles.add(article);
-//}
-//
-//return articles;
-//}
-
-//public List<Article> getArticles(String queryParamString, String resultFilterString, String sortString) throws SQLException {
-//
-//ArrayList<Article> articles = new ArrayList<Article>();
-//
-//List<Query> queries = argumentsParser.getQueryList(queryParamString, queryParameter);
-//List<String> sorts = argumentsParser.getSorts(sortString);
-//
-//List<String> validResultFilters;
-//if (StringUtils.isEmpty(resultFilterString)) {
-//validResultFilters = allowedResultFilters;
-//} else {
-//validResultFilters = getValidResultFilters(resultFilterString);
-//}
-//
-//if (queries.size() == 0) {
-//return buildAllArticles(jdbcTemplate, validResultFilters, sorts);
-//}
-//
-//Collections.sort(queries);
-//
-//StringBuilder sqlBuilder = new StringBuilder();
-//sqlBuilder.append("select * from articles where");
-//
-//String previousQueryName = new String();
-//for (int i = 0; i < queries.size(); i++) {
-//
-//Query query = queries.get(i);
-//
-//String currentQueryName = query.getName().toUpperCase();
-//String nextQueryName = new String();
-//if (i + 1 != queries.size()) {
-//nextQueryName = queries.get(i + 1).getName().toUpperCase();
-//}
-//
-//if ((!currentQueryName.equals(previousQueryName)) && currentQueryName.equals(nextQueryName)) {
-//sqlBuilder.append(" (");
-//appendComparisonString(sqlBuilder, query, currentQueryName);
-//sqlBuilder.append(" OR");
-//} else if (currentQueryName.equals(previousQueryName) && currentQueryName.equals(nextQueryName)) {
-//appendComparisonString(sqlBuilder, query, currentQueryName);
-//sqlBuilder.append(" OR");
-//} else if (currentQueryName.equals(previousQueryName) && !currentQueryName.equals(nextQueryName)) {
-//appendComparisonString(sqlBuilder, query, currentQueryName);
-//sqlBuilder.append(" )");
-//sqlBuilder.append(" AND");
-//} else {
-//appendComparisonString(sqlBuilder, query, currentQueryName);
-//sqlBuilder.append(" AND");
-//}
-//
-//previousQueryName = currentQueryName;
-//}
-//
-//sqlBuilder.replace(sqlBuilder.length() - " AND".length(), sqlBuilder.length(), "");
-//
-//sqlBuilder.append(buildOrderBy(sorts));
-//
-//String sql = sqlBuilder.toString();
-//
-//List<String> queryValues = new ArrayList<String>();
-//for (Query query : queries) {
-//
-//String queryValue = query.getValue();
-//if (query.getOperation().equals(Operation.LIKE)) {
-//queryValues.add(queryValue.replaceAll("[*]", "%"));
-//} else {
-//queryValues.add(queryValue);
-//}
-//}
-//
-//sql = modifySqlForTopicsQueries(sql);
-//sql = modifySqlForRankQueries(sql);
-//sql = modifySqlForSubtopicsQueries(sql);
-//
-//log.info(new StringBuilder("Executing sql statement '").append(sql).append("'").toString());
-//
-//SqlRowSet articlesRowSet = jdbcTemplate.queryForRowSet(sql, queryValues.toArray());
-//while (articlesRowSet.next()) {
-//Article article = mapRowToContact(jdbcTemplate, articlesRowSet, validResultFilters);
-//articles.add(article);
-//}
-//
-//return articles;
-//}

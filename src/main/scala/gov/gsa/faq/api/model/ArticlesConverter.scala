@@ -11,7 +11,7 @@ class ArticlesConverter {
           val link = (article \ "link").text
           val title = (article \ "title").text
           val body = (article \ "body").text
-          val rank = (article \ "rank").text.toDouble
+          val rank = (article \ "rank").text
           val updated = (article \ "updated").text
           val topicsNode = (article \ "topics").map { topics =>
             val topicList = (topics \ "topic").map { topic =>
