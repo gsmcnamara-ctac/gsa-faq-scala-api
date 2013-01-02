@@ -7,6 +7,5 @@ import collection.mutable.ArrayBuffer
 @XmlAccessorType(XmlAccessType.FIELD)
 case class Subtopics (
 
-  @XmlElement var subtopic: Seq[String]
-) {
+  @XmlElement var subtopic: Seq[String]) {
 }

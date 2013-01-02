@@ -8,6 +8,5 @@ import collection.mutable.ArrayBuffer
 case class Topic(
 
   @XmlElement var name: String,
-  @XmlElement var subtopics: Subtopics
-) {
+  @XmlElement var subtopics: Subtopics) {
 }

@@ -5,10 +5,12 @@ import org.apache.commons.io.FileUtils
 import java.io.File
 import gov.gsa.faq.api.Constants
 import gov.gsa.rest.api.dao.{ArgumentsParser, InMemoryHSQLDatabase}
-import gov.gsa.faq.api.model.{QueryParameterImpl, Article, Articles}
+import gov.gsa.faq.api.model.{ResultFilterImpl, QueryParameterImpl, Article, Articles}
 import gov.gsa.rest.api.model.QueryParameter
 import javax.sql.DataSource
 import scala.collection.JavaConversions._
+import org.apache.commons.lang.StringUtils
+import org.springframework.jdbc.core.JdbcTemplate
 
 class FaqDaoTest extends FeatureSpec with BeforeAndAfter {
 
@@ -37,25 +39,64 @@ class FaqDaoTest extends FeatureSpec with BeforeAndAfter {
   }
 }
 
-class FaqDao(
-
-  val dataSource: DataSource
-
-) {
+class FaqDao(val dataSource: DataSource) {
 
   val argumentsParser : ArgumentsParser = new ArgumentsParser()
   val queryParameter: QueryParameter = new QueryParameterImpl()
+  val allowedResultFilters = new ResultFilterImpl().getResultFilters()
+  var jdbcTemplate : JdbcTemplate = new JdbcTemplate(dataSource)
 
   def getArticles(queryParamString:String,resultFilterString:String,sortString:String) : Seq[Article] = {
 
     val queries = argumentsParser.getQueryList(queryParamString, queryParameter)
-    queries.foreach { query =>
+    val sorts = argumentsParser.getSorts(sortString)
 
+    var validResultFilters : java.util.List[String] = null
+    if(StringUtils.isEmpty(resultFilterString)) {
+      validResultFilters = allowedResultFilters
+    } else {
+      validResultFilters = getValidResultFilters(resultFilterString)
+    }
+
+    if (queries.size == 0) {
+      buildAllArticles(jdbcTemplate, validResultFilters, sorts)
     }
 
     null
   }
+
+  def buildAllArticles(jdbcTemplate:JdbcTemplate,resultFilters:java.util.List[String],sorts:java.util.List[String]) : Seq[Article] = {
+    null
+  }
+
+  def getValidResultFilters(resultFilterString: String) = {
+    val resultFilters = argumentsParser.getResultFilters(resultFilterString)
+    val validResultFilters = new java.util.ArrayList[String]()
+    resultFilters.foreach { resultFilter =>
+      if (allowedResultFilters.contains(resultFilter)) {
+        validResultFilters += resultFilter
+      }
+    }
+    validResultFilters
+  }
 }
+
+//private List<Article> buildAllArticles(JdbcTemplate jdbcTemplate, List<String> resultFilters, List<String> sorts) {
+//
+//String sql = new StringBuilder("select * from articles").append(buildOrderBy(sorts)).toString();
+//
+//log.info(new StringBuilder("Executing the sql statement '").append(sql).append("'").toString());
+//
+//SqlRowSet contactsRowSet = jdbcTemplate.queryForRowSet(sql);
+//
+//List<Article> articles = new ArrayList<Article>();
+//while (contactsRowSet.next()) {
+//Article article = mapRowToContact(jdbcTemplate, contactsRowSet, resultFilters);
+//articles.add(article);
+//}
+//
+//return articles;
+//}
 
 //public List<Article> getArticles(String queryParamString, String resultFilterString, String sortString) throws SQLException {
 //

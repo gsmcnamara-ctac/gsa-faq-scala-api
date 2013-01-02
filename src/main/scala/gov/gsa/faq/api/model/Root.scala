@@ -6,6 +6,5 @@ import javax.xml.bind.annotation.{XmlElement, XmlAccessType, XmlAccessorType, Xm
 @XmlAccessorType(XmlAccessType.FIELD)
 case class Root(
 
-  @XmlElement var articles: Articles
-) {
+  @XmlElement var articles: Articles) {
 }
