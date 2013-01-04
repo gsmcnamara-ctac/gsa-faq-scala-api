@@ -9,4 +9,8 @@ case class Topic(
 
   @XmlElement var name: String,
   @XmlElement var subtopics: Subtopics) {
+
+  def this() {
+    this(null,null)
+  }
 }

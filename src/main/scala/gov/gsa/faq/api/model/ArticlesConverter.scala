@@ -1,5 +1,7 @@
 package gov.gsa.faq.api.model
 
+import scala.collection.JavaConversions._
+
 class ArticlesConverter {
 
   def toArticles(xml: String): Seq[Article] = {
@@ -20,7 +22,7 @@ class ArticlesConverter {
                 val subtopicsList = (subtopics \ "subtopic").map { subtopic =>
                   subtopic.text
                 }
-                Subtopics(subtopicsList.seq)
+                Subtopics(subtopicsList.toList)
               }
               if(subtopicsNode.seq!=null && subtopicsNode.seq.size > 0) {
                 Topic(name,subtopicsNode.seq(0))
@@ -28,11 +30,11 @@ class ArticlesConverter {
                 Topic(name,null)
               }
             }
-            Topics(topicList.seq)
+            Topics(topicList.toList)
           }
-          Article(id, link, title, body, rank, updated, topicsNode.seq(0))
+          Article(id, link, title, body, rank, updated, topicsNode.toList(0))
       }
-      Articles(articleList.seq)
+      Articles(articleList.toList)
     }
 
     return articlesNode.seq(0).article

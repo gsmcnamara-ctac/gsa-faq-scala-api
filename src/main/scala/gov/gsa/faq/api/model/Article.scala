@@ -6,11 +6,15 @@ import collection.mutable.ArrayBuffer
 @XmlRootElement(name = "article", namespace = "")
 @XmlAccessorType(XmlAccessType.FIELD)
 case class Article(
-  @XmlElement val id: String,
-  @XmlElement val link: String,
-  @XmlElement val title: String,
-  @XmlElement val body: String,
-  @XmlElement val rank: String,
-  @XmlElement val updated: String,
-  @XmlElement val topics : Topics) {
+  @XmlElement var id: String,
+  @XmlElement var link: String,
+  @XmlElement var title: String,
+  @XmlElement var body: String,
+  @XmlElement var rank: String,
+  @XmlElement var updated: String,
+  @XmlElement var topics : Topics) {
+
+  def this() {
+    this(null,null,null,null,null,null,null)
+  }
 }

@@ -1,23 +1,18 @@
 package gov.gsa.faq.api
 
-import dao.{FaqDatabase, FaqDao}
 import model.{Articles, Article}
 import org.scalatest.{FeatureSpec, BeforeAndAfter}
-import gov.gsa.rest.api.{RangeFinder, RestAPI}
+import gov.gsa.rest.api.{RangeFinder}
 import javax.servlet.http.HttpServletRequest
 import javax.ws.rs._
-import com.wordnik.swagger.annotations.{Api, ApiParam, ApiOperation}
-import com.wordnik.swagger.core.util.RestResourceUtil
-import gov.gsa.rest.api.dao.InMemoryHSQLDatabase
-import collection.mutable.ListBuffer
-import gov.gsa.rest.api.exception.ApiException
 import org.apache.commons.io.FileUtils
 import java.io.File
-import com.wordnik.swagger.jaxrs.Help
 import java.net.URI
 import core._
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.when
+import io.Source
+import scala.collection.JavaConversions._
 
 class ArticlesResourceTest extends FeatureSpec with BeforeAndAfter {
 
@@ -52,78 +47,27 @@ class ArticlesResourceTest extends FeatureSpec with BeforeAndAfter {
       val articles = response.getEntity().asInstanceOf[Articles].article
       assert(1999 == articles.size, articles.size)
 
-//      Articles _articles = (Articles) response.getEntity();
-//      List<Article> articles = _articles.getArticles();
-//
-//      assertEquals(2020, articles.size());
-//
-//      Article article = null;
-//
-//      for (Article _article : articles) {
-//        if(_article.getId().equals("9666")) {
-//          article = _article;
-//        }
-//      }
-//
-//      assertEquals("http://answers.usa.gov/system/web/view/selfservice/templates/USAgov/egredirect.jsp?p_faq_id=9666", article.getLink());
-//      assertTrue(article.getTitle().matches("Fish and Wildlife Service:.*Student Employment Programs"));
-//      assertEquals("<![CDATA["+IOUtils.toString(new ClassPathResource("9666.body").getInputStream())+"]]", article.getBody());
-//      assertEquals(new Double(50.43334), article.getRank());
-//      assertEquals("Nov 26 2012 04:58:24:000PM", article.getUpdated());
-//
-//      Topics topics = article.getTopics();
-//      List<Topic> topicsList = topics.getTopics();
-//      assertEquals(2, topicsList.size());
-//      assertEquals("Jobs and Education", topicsList.get(0).getName());
-//      assertEquals("Fish and Wildlife Service (FWS)", topicsList.get(1).getName());
-//
-//      Topic topic = topicsList.get(0);
-//      Subtopics subtopics = topic.getSubtopics();
-//      List<String> subtopicsList = subtopics.getSubtopics();
-//      assertEquals("Education", subtopicsList.get(0));
-//      assertEquals("Jobs", subtopicsList.get(1));
-    }
-  }
-}
-
-trait ArticlesResource extends RestResourceUtil with RestAPI with LogHelper {
-
-  @Context var uriInfo :UriInfo = _
-  @Context var request :HttpServletRequest = _
-  var rangeFinder : RangeFinder = new RangeFinder()
-
-  @GET
-  @ApiOperation(value = "Get all Aritcles", notes = "")
-  @Path("/articles")
-  override def getResource(@ApiParam(value = "Filter by query param. Ex. \"title::Social Security Administration (SSA)|rank:gt:10.1\"", required = false) @QueryParam("query_filter") queryFilter:String,
-                           @ApiParam(value = "Limit results by property name. Ex. \"id|title|rank\"", required = false) @QueryParam("result_filter") resultFilter:String,
-                           @ApiParam(value = "Sort by property name. Use '-' for descending. Ex. \"id|-rank\"", required = false) @QueryParam("sort") sortParam:String,
-                           @ApiParam(value = "Limit results by range. Ex. \"items=1-101\"", required = false) @HeaderParam("X-Range") rangeHeader:String) : Response = {
-
-    try{
-      val faqDao = new FaqDao(InMemoryHSQLDatabase.getInstance(new FaqDatabase()).getDataSource())
-      val articles = faqDao.getArticles(queryFilter, resultFilter, sortParam)
-      var range = rangeFinder.getRange(articles.size, rangeHeader)
-      val articleList = new ListBuffer[Article]()
-
-      if (articles.size>0) {
-        if (range == null) {
-          range = new gov.gsa.rest.api.Range(1, articles.size, articles.size)
-        }
-        for(i <- range.start-1 until range.end) {
-          articleList += articles(i)
+      var article : Article = null
+      articles.foreach { _article =>
+        if(_article.id == "9666") {
+          article = _article
         }
       }
 
-      Response.ok().entity(new Articles(articleList)).header("X-Content-Range", range.toString).build()
+      assert(article != null)
+      assert("http://answers.usa.gov/system/web/view/selfservice/templates/USAgov/egredirect.jsp?p_faq_id=9666" == article.link, article.link)
+      assert(article.title.matches("Fish and Wildlife Service:.*Student Employment Programs"))
+      assert("<![CDATA["+Source.fromInputStream(getClass().getResourceAsStream("/9666.body")).getLines().mkString("\n")+"]]" == article.body, article.body)
+      assert(50.43334 == article.rank.toDouble, article.rank)
+      assert("Nov 26 2012 04:58:24:000PM" == article.updated, article.updated)
 
-    } catch {
-      case e: Exception => throw new ApiException(e)
+      val topics = article.topics.topic
+      assert(2 == topics.size, topics.size)
+      assert("Jobs and Education" == topics(0).name, topics(0).name)
+      assert("Fish and Wildlife Service (FWS)" == topics(1).name, topics(1).name)
+
+      assert("Education" == topics(0).subtopics.subtopic(0), topics(0).subtopics.subtopic(0))
+      assert("Jobs" == topics(0).subtopics.subtopic(1), topics(0).subtopics.subtopic(1))
     }
   }
 }
-
-@Path("/articles.json")
-@Api(value = "/articles", description = "Articles operations")
-@Produces(Array(MediaType.APPLICATION_JSON + ";charset=utf-8"))
-class ArticlesResourceJSON extends Help with ArticlesResource

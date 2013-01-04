@@ -1,13 +1,13 @@
 package gov.gsa.faq.api.dao
 
-import gov.gsa.rest.api.dao.{XMLUnmarshallUtils, DatabaseAdministrator}
+import gov.gsa.rest.api.dao.{DatabaseAdministrator}
 import gov.gsa.faq.api.model.{ArticlesConverter, Article, Root}
 import gov.gsa.faq.api.{Constants, LogHelper}
 import javax.sql.DataSource
 import org.springframework.jdbc.core.{PreparedStatementCreator, JdbcTemplate}
 import java.sql.{Statement, PreparedStatement, Connection}
-import java.util.Collections
 import org.springframework.jdbc.support.GeneratedKeyHolder
+import scala.collection.JavaConversions._
 
 class FaqDatabase extends DatabaseAdministrator with LogHelper {
 

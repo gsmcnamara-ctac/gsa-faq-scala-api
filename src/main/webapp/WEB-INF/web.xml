@@ -20,7 +20,7 @@
 
 	<filter-mapping>
 		<filter-name>JsonpFilter</filter-name>
-		<url-pattern>/contacts.jsonp/*</url-pattern>
+		<url-pattern>/articles.jsonp/*</url-pattern>
 	</filter-mapping>
 	
 	<servlet>

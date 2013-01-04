@@ -4,6 +4,7 @@ import org.scalatest.FreeSpec
 import gov.gsa.faq.api.Constants
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
+import scala.collection.JavaConversions._
 
 @RunWith(classOf[JUnitRunner])
 class ArticlesConverterTest extends FreeSpec {

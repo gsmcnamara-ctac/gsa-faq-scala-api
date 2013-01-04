@@ -8,7 +8,11 @@ import gov.gsa.faq.api.Constants
 import gov.gsa.rest.api.dao._
 import javax.sql.DataSource
 import gov.gsa.faq.api.model.Article
+import scala.collection.JavaConversions._
+import org.junit.runner.RunWith
+import org.scalatest.junit.JUnitRunner
 
+@RunWith(classOf[JUnitRunner])
 class FaqDaoTest extends FeatureSpec with BeforeAndAfter {
 
   var database : InMemoryHSQLDatabase = _

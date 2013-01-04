@@ -195,14 +195,14 @@ class FaqDao(val dataSource: DataSource) extends LogHelper {
         if (subtopicList.isEmpty) {
           topic = Topic(topicName,null)
         } else {
-          topic = Topic(topicName,Subtopics(subtopicList))
+          topic = Topic(topicName,Subtopics(subtopicList.toList))
         }
 
         topicList += topic
       }
 
       if (!topicList.isEmpty) {
-        topics = new Topics(topicList)
+        topics = new Topics(topicList.toList)
       }
     }
 

@@ -7,4 +7,8 @@ import javax.xml.bind.annotation.{XmlElement, XmlAccessType, XmlAccessorType, Xm
 case class Root(
 
   @XmlElement var articles: Articles) {
+
+  def this() {
+    this(null)
+  }
 }
