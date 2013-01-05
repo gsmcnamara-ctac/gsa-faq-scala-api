@@ -6,6 +6,7 @@ import collection.mutable.ArrayBuffer
 @XmlRootElement(name = "article", namespace = "")
 @XmlAccessorType(XmlAccessType.FIELD)
 case class Article(
+
   @XmlElement var id: String,
   @XmlElement var link: String,
   @XmlElement var title: String,

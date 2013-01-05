@@ -44,7 +44,7 @@ trait ArticlesResource extends RestResourceUtil with RestAPI with LogHelper {
           articleList += articles(i)
         }
       }
-      Response.ok().entity(new Articles(articleList.toList)).header("X-Content-Range", range.toString).build()
+      Response.ok().entity(new Articles(articleList)).header("X-Content-Range", range.toString).build()
 
     } catch {
       case e: Exception => throw new ApiException(e)
