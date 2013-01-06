@@ -31,30 +31,30 @@ class FaqDatabaseTest extends FeatureSpec with BeforeAndAfter {
 
       val jdbcTemplate = new JdbcTemplate(database.getDataSource)
 
-      assert(2020 == jdbcTemplate.queryForInt("select count(*) from articles"))
+      assert(2020 === jdbcTemplate.queryForInt("select count(*) from articles"))
 
       var rowSet = jdbcTemplate.queryForRowSet("select * from articles where id='9666'")
       assert(rowSet.next())
-      assert("9666" == rowSet.getString("id"), rowSet.getString("id"))
-      assert("http://answers.usa.gov/system/web/view/selfservice/templates/USAgov/egredirect.jsp?p_faq_id=9666" == rowSet.getString("link"), rowSet.getString("link"))
-      assert(rowSet.getString("title").matches("Fish and Wildlife Service:.*Student Employment Programs"), rowSet.getString("title"))
-      assert(50.43334 == rowSet.getDouble("rank"), rowSet.getDouble("rank"))
-      assert("Nov 26 2012 04:58:24:000PM" == rowSet.getString("updated"), rowSet.getString("updated"))
-      assert(Source.fromInputStream(getClass().getResourceAsStream("/9666.body")).getLines().mkString("\n") == rowSet.getString("body"), rowSet.getString("body"))
+      assert("9666" === rowSet.getString("id"))
+      assert("http://answers.usa.gov/system/web/view/selfservice/templates/USAgov/egredirect.jsp?p_faq_id=9666" === rowSet.getString("link"))
+      assert(rowSet.getString("title").matches("Fish and Wildlife Service:.*Student Employment Programs"))
+      assert(50.43334 === rowSet.getDouble("rank"))
+      assert("Nov 26 2012 04:58:24:000PM" === rowSet.getString("updated"))
+      assert(Source.fromInputStream(getClass().getResourceAsStream("/9666.body")).getLines().mkString("\n") === rowSet.getString("body"))
 
       rowSet = jdbcTemplate.queryForRowSet("select * from topics where article='9666'")
       assert(rowSet.next())
-      assert("Jobs and Education" == rowSet.getString("name"), rowSet.getString("name"))
+      assert("Jobs and Education" === rowSet.getString("name"))
       val topicId = rowSet.getInt("id")
       assert(rowSet.next())
-      assert("Fish and Wildlife Service (FWS)" == rowSet.getString("name"), rowSet.getString("name"))
+      assert("Fish and Wildlife Service (FWS)" === rowSet.getString("name"))
       assert(!rowSet.next())
 
       rowSet = jdbcTemplate.queryForRowSet("select * from subtopics where topic="+topicId)
       assert(rowSet.next())
-      assert("Education" == rowSet.getString("subtopic"))
+      assert("Education" === rowSet.getString("subtopic"))
       assert(rowSet.next())
-      assert("Jobs" == rowSet.getString("subtopic"))
+      assert("Jobs" === rowSet.getString("subtopic"))
     }
   }
 }

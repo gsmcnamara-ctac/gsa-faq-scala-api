@@ -57,7 +57,7 @@ class ArticlesCmsServicesTest extends FeatureSpec with BeforeAndAfter {
       when(servicesConnector.getTargetFolders).thenReturn(Array("targetFolder"))
       when(percussionServices.createItem(fields, "targetFolder", "faqArticle")).thenReturn(1234)
 
-      assert("1234"==services.createArticle(article))
+      assert("1234"===services.createArticle(article))
 
       verify(percussionServices).login()
       verify(servicesConnector).configureServices(services)
@@ -129,24 +129,24 @@ class ArticlesCmsServicesTest extends FeatureSpec with BeforeAndAfter {
       when(percussionServices.loadItem(1234)).thenReturn(item)
 
       val articles = services.getAll()
-      assert(1==articles.size,articles.size)
-      assert("id"==articles(0).id,articles(0).id)
-      assert("link"==articles(0).link,articles(0).link)
-      assert("body"==articles(0).body,articles(0).body)
-      assert("rank"==articles(0).rank,articles(0).rank)
-      assert("title"==articles(0).title,articles(0).title)
-      assert("updated"==articles(0).updated,articles(0).updated)
+      assert(1===articles.size)
+      assert("id"===articles(0).id)
+      assert("link"===articles(0).link)
+      assert("body"===articles(0).body)
+      assert("rank"===articles(0).rank)
+      assert("title"===articles(0).title)
+      assert("updated"===articles(0).updated)
 
       val topics = articles(0).topics
-      assert(2==topics.topic.size,topics.topic.size)
-      assert("topic1"==topics.topic.get(0).name,topics.topic.get(0).name)
-      assert(2==topics.topic.get(0).subtopics.subtopic.size,topics.topic.get(0).subtopics.subtopic.size)
-      assert("subtopic1"==topics.topic.get(0).subtopics.subtopic.get(0),topics.topic.get(0).subtopics.subtopic.get(0))
-      assert("subtopic2"==topics.topic.get(0).subtopics.subtopic.get(1),topics.topic.get(0).subtopics.subtopic.get(1))
-      assert("topic2"==topics.topic.get(1).name,topics.topic.get(1).name)
-      assert(2==topics.topic.get(1).subtopics.subtopic.size,topics.topic.get(1).subtopics.subtopic.size)
-      assert("subtopic3"==topics.topic.get(1).subtopics.subtopic.get(0),topics.topic.get(1).subtopics.subtopic.get(0))
-      assert("subtopic4"==topics.topic.get(1).subtopics.subtopic.get(1),topics.topic.get(1).subtopics.subtopic.get(1))
+      assert(2===topics.topic.size)
+      assert("topic1"===topics.topic.get(0).name)
+      assert(2===topics.topic.get(0).subtopics.subtopic.size)
+      assert("subtopic1"===topics.topic.get(0).subtopics.subtopic.get(0))
+      assert("subtopic2"===topics.topic.get(0).subtopics.subtopic.get(1))
+      assert("topic2"===topics.topic.get(1).name)
+      assert(2===topics.topic.get(1).subtopics.subtopic.size)
+      assert("subtopic3"===topics.topic.get(1).subtopics.subtopic.get(0))
+      assert("subtopic4"===topics.topic.get(1).subtopics.subtopic.get(1))
 
       verify(percussionServices).login()
       verify(servicesConnector).configureServices(services)
@@ -157,11 +157,11 @@ class ArticlesCmsServicesTest extends FeatureSpec with BeforeAndAfter {
   feature("makeTopicsString") {
 
     scenario("null topics") {
-      assert("" == services.makeTopicsString(null), services.makeTopicsString(null))
+      assert("" === services.makeTopicsString(null))
     }
 
     scenario("empty topics") {
-      assert("" == services.makeTopicsString(new Topics()), services.makeTopicsString(new Topics()))
+      assert("" === services.makeTopicsString(new Topics()))
     }
 
     scenario("null or empty subtopics") {
@@ -173,7 +173,7 @@ class ArticlesCmsServicesTest extends FeatureSpec with BeforeAndAfter {
       topicList += new Topic("topic3",new Subtopics(null))
       topics.topic = topicList.toList
 
-      assert("topic1|topic2|topic3" == services.makeTopicsString(topics), services.makeTopicsString(topics))
+      assert("topic1|topic2|topic3" === services.makeTopicsString(topics))
     }
 
     scenario("two topics with two subtopics each") {
@@ -184,7 +184,7 @@ class ArticlesCmsServicesTest extends FeatureSpec with BeforeAndAfter {
       topicList += new Topic("topic2",new Subtopics(List("subtopic3","subtopic4")))
       topics.topic = topicList.toList
 
-      assert("topic1-subtopic1,subtopic2|topic2-subtopic3,subtopic4" == services.makeTopicsString(topics), services.makeTopicsString(topics))
+      assert("topic1-subtopic1,subtopic2|topic2-subtopic3,subtopic4" === services.makeTopicsString(topics))
     }
   }
 }

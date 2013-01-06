@@ -19,14 +19,14 @@ class TopicsConverterTest extends FlatSpec {
     field.setPSFieldValue(Array(value))
     val topics = new TopicsConverter().convertField(field)
 
-    assert(2==topics.topic.size())
-    assert("topic1"==topics.topic.get(0).name)
-    assert(2==topics.topic.get(0).subtopics.subtopic.size())
-    assert("subtopic1"==topics.topic.get(0).subtopics.subtopic.get(0))
-    assert("subtopic2"==topics.topic.get(0).subtopics.subtopic.get(1))
-    assert("topic2"==topics.topic.get(1).name)
-    assert(2==topics.topic.get(1).subtopics.subtopic.size())
-    assert("subtopic3"==topics.topic.get(1).subtopics.subtopic.get(0))
-    assert("subtopic4"==topics.topic.get(1).subtopics.subtopic.get(1))
+    assert(2===topics.topic.size())
+    assert("topic1"===topics.topic.get(0).name)
+    assert(2===topics.topic.get(0).subtopics.subtopic.size())
+    assert("subtopic1"===topics.topic.get(0).subtopics.subtopic.get(0))
+    assert("subtopic2"===topics.topic.get(0).subtopics.subtopic.get(1))
+    assert("topic2"===topics.topic.get(1).name)
+    assert(2===topics.topic.get(1).subtopics.subtopic.size())
+    assert("subtopic3"===topics.topic.get(1).subtopics.subtopic.get(0))
+    assert("subtopic4"===topics.topic.get(1).subtopics.subtopic.get(1))
   }
 }

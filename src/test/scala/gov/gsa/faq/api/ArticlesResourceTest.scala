@@ -13,6 +13,7 @@ import org.mockito.Mockito.mock
 import org.mockito.Mockito.when
 import io.Source
 import scala.collection.JavaConversions._
+import org.scalatest.matchers.ShouldMatchers._
 
 class ArticlesResourceTest extends FeatureSpec with BeforeAndAfter {
 
@@ -42,10 +43,10 @@ class ArticlesResourceTest extends FeatureSpec with BeforeAndAfter {
 
       val response : Response = articlesResource.getResource(null, null, null,"items=1-1999")
       val metadata : MultivaluedMap[String,Object] = response.getMetadata()
-      assert("1-1999/2020" == metadata.get("X-Content-Range").get(0))
+      assert("1-1999/2020" === metadata.get("X-Content-Range").get(0))
 
       val articles = response.getEntity().asInstanceOf[Articles].article
-      assert(1999 == articles.size, articles.size)
+      assert(1999 === articles.size)
 
       var article : Article = null
       articles.foreach { _article =>
@@ -54,20 +55,20 @@ class ArticlesResourceTest extends FeatureSpec with BeforeAndAfter {
         }
       }
 
-      assert(article != null)
-      assert("http://answers.usa.gov/system/web/view/selfservice/templates/USAgov/egredirect.jsp?p_faq_id=9666" == article.link, article.link)
+      article should not be (null)
+      assert("http://answers.usa.gov/system/web/view/selfservice/templates/USAgov/egredirect.jsp?p_faq_id=9666" === article.link)
       assert(article.title.matches("Fish and Wildlife Service:.*Student Employment Programs"))
-      assert("<![CDATA["+Source.fromInputStream(getClass().getResourceAsStream("/9666.body")).getLines().mkString("\n")+"]]" == article.body, article.body)
-      assert(50.43334 == article.rank.toDouble, article.rank)
-      assert("Nov 26 2012 04:58:24:000PM" == article.updated, article.updated)
+      assert("<![CDATA["+Source.fromInputStream(getClass().getResourceAsStream("/9666.body")).getLines().mkString("\n")+"]]" === article.body)
+      assert(50.43334 === article.rank.toDouble)
+      assert("Nov 26 2012 04:58:24:000PM" === article.updated)
 
       val topics = article.topics.topic
-      assert(2 == topics.size, topics.size)
-      assert("Jobs and Education" == topics(0).name, topics(0).name)
-      assert("Fish and Wildlife Service (FWS)" == topics(1).name, topics(1).name)
+      assert(2 === topics.size)
+      assert("Jobs and Education" === topics(0).name)
+      assert("Fish and Wildlife Service (FWS)" === topics(1).name)
 
-      assert("Education" == topics(0).subtopics.subtopic(0), topics(0).subtopics.subtopic(0))
-      assert("Jobs" == topics(0).subtopics.subtopic(1), topics(0).subtopics.subtopic(1))
+      assert("Education" === topics(0).subtopics.subtopic(0))
+      assert("Jobs" === topics(0).subtopics.subtopic(1))
     }
   }
 }
