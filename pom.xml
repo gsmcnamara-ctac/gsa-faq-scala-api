@@ -32,14 +32,19 @@
         </dependency>
         <dependency>
             <groupId>org.scalatest</groupId>
-            <artifactId>scalatest_2.9.2</artifactId>
-            <version>1.8</version>
+            <artifactId>scalatest_2.10.0</artifactId>
+            <version>2.0.M5</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.scala-lang</groupId>
             <artifactId>scala-library</artifactId>
-            <version>2.9.2</version>
+            <version>2.10.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.scala-lang</groupId>
+            <artifactId>scala-reflect</artifactId>
+            <version>2.10.0</version>
         </dependency>
         <dependency>
             <groupId>gov.gsa</groupId>
@@ -107,6 +112,7 @@
                                 <arg>-encoding</arg>
                                 <arg>macroman</arg>
                             </args>
+                            <scalaVersion>2.10.0</scalaVersion>
                         </configuration>
                     </execution>
                     <execution>
@@ -120,6 +126,7 @@
                                 <arg>-encoding</arg>
                                 <arg>macroman</arg>
                             </args>
+                            <scalaVersion>2.10.0</scalaVersion>
                         </configuration>
                     </execution>
                 </executions>

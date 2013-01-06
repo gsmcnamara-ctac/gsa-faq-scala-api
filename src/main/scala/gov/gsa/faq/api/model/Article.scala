@@ -1,9 +1,8 @@
 package gov.gsa.faq.api.model
 
 import javax.xml.bind.annotation.{XmlElement, XmlAccessType, XmlAccessorType, XmlRootElement}
-import collection.mutable.ArrayBuffer
-import com.ctacorp.rhythmyx.soap.{FieldConverter, RhythmyxContentTypeField}
-import com.percussion.webservices.content.PSField
+import com.ctacorp.rhythmyx.soap.RhythmyxContentTypeField
+import scala.reflect.runtime.universe._
 
 @XmlRootElement(name = "article", namespace = "")
 @XmlAccessorType(XmlAccessType.FIELD)
