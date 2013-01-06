@@ -22,14 +22,6 @@ class FaqDao(val dataSource: DataSource) extends LogHelper {
   var jdbcTemplate : JdbcTemplate = new JdbcTemplate(dataSource)
   val sqlHelper : SQLHelper = new SQLHelper()
 
-  def insertCmsId(id:String, cmsId:String) {
-    jdbcTemplate.update(new PreparedStatementCreator {
-      def createPreparedStatement(connection: Connection): PreparedStatement = {
-        val ps: PreparedStatement = connection.prepareStatement("insert into articles (id, link, title, body, rank, updated) values (?,?,?,?,?,?) ")
-      }
-    })
-  }
-
   def getArticles(queryParamString:String,resultFilterString:String,sortString:String) : Seq[Article] = {
 
     val queries = argumentsParser.getQueryList(queryParamString, queryParameter)

@@ -32,14 +32,6 @@ class FaqDaoTest extends FeatureSpec with BeforeAndAfter {
     faqDao = new FaqDao(dataSource)
   }
 
-  feature("insertCmsId") {
-
-    scenario("insert a pair of ids into the ids table") {
-
-
-    }
-  }
-
   feature("getArticles") {
 
     scenario("all null params (return all articles all data)") {

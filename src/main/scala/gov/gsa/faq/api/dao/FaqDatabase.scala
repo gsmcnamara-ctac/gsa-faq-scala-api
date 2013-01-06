@@ -20,15 +20,14 @@ class FaqDatabase extends DatabaseAdministrator with LogHelper {
   }
 
   def getTableNames(): Array[String] = {
-    Array("articles", "topics", "subtopics", "ids")
+    Array("articles", "topics", "subtopics")
   }
 
   def getTableCreationSqls(): Array[String] = {
     Array(
       "create table articles (id VARCHAR not null, link VARCHAR, title VARCHAR, body VARCHAR, rank DOUBLE, updated VARCHAR, PRIMARY KEY (id))",
       "create table topics (id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY, article VARCHAR, name VARCHAR)",
-      "create table subtopics (id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY, article VARCHAR, topic INTEGER, subtopic VARCHAR)",
-      "create table ids (id VARCHAR not null, cms_id LONG not null)"
+      "create table subtopics (id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY, article VARCHAR, topic INTEGER, subtopic VARCHAR)"
     )
   }
 

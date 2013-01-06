@@ -14,7 +14,10 @@ import org.mockito.Mockito.when
 import io.Source
 import scala.collection.JavaConversions._
 import org.scalatest.matchers.ShouldMatchers._
+import org.junit.runner.RunWith
+import org.scalatest.junit.JUnitRunner
 
+@RunWith(classOf[JUnitRunner])
 class ArticlesResourceTest extends FeatureSpec with BeforeAndAfter {
 
   var articlesResource : ArticlesResource = _
