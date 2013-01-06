@@ -3,13 +3,15 @@ package gov.gsa.faq.api.cms
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.{BeforeAndAfter, FeatureSpec}
-import com.ctacorp.rhythmyx.soap.{ServicesConnector, PercussionContentServices}
+import com.ctacorp.rhythmyx.soap.{FieldConverter, ServicesConnector, PercussionContentServices}
 import gov.gsa.faq.api.model.{Subtopics, Topic, Topics, Article}
 import scala.collection.JavaConversions._
 import collection.mutable.ListBuffer
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.when
 import org.mockito.Mockito.verify
+import com.percussion.webservices.content.{PSField, PSItem, PSItemSummary}
+import gov.gsa.faq.api.LogHelper
 
 @RunWith(classOf[JUnitRunner])
 class ArticlesCmsServicesTest extends FeatureSpec with BeforeAndAfter {
@@ -98,7 +100,7 @@ class ArticlesCmsServicesTest extends FeatureSpec with BeforeAndAfter {
   }
 }
 
-class ArticlesCmsServices extends PercussionContentServices {
+class ArticlesCmsServices extends PercussionContentServices with LogHelper {
 
    var services : PercussionContentServices = this
    var servicesConnector: ServicesConnector = _
@@ -125,7 +127,57 @@ class ArticlesCmsServices extends PercussionContentServices {
 
   def getAll() : List[Article] = {
 
+    servicesConnector.configureServices(this)
+    val targetFolder = servicesConnector.getTargetFolders()(0)
 
+    services.login()
+
+    val summaries : Array[PSItemSummary] = services.findFolderChildren(targetFolder)
+    for(summary <- summaries) {
+      val contentTypeName = (summary:PSItemSummary) => {
+        val contentType = summary.getContentType
+        if (contentType==null) {
+          logger.error("ContentType was null for PSItemSummary with id=" + summary.getId())
+        } else {
+          if (contentType.getName==null||contentType.getName.length==0) {
+            logger.error("ContentType.name was null for PSItemSummary with id=" + summary.getId())
+            null
+          } else {
+            contentType.getName
+          }
+        }
+      }
+      if (contentTypeName=="faqArticle") {
+        var psItem = services.loadItem(summary.getId)
+
+      }
+    }
+
+    services.logout()
+
+//    List<MobApplication> applications = new ArrayList<MobApplication>();
+//
+//    for (String targetFolder : targetFolders) {
+//      PSItemSummary[] summaries = services.findFolderChildren(targetFolder);
+//      for (PSItemSummary summary : summaries) {
+//        Reference contentType = summary.getContentType();
+//        if (contentType == null) {
+//          System.err.println("ContentType was null for PSItemSummary with id=" + summary.getId());
+//          continue;
+//        }
+//        String name = contentType.getName();
+//        if (StringUtils.isEmpty(name)) {
+//          System.err.println("ContentType.name was null for PSItemSummary with id=" + summary.getId());
+//          continue;
+//        }
+//        if (name.equals("mobApplication")) {
+//          MobApplication mobApplication = getMobApplication(summary.getId());
+//          applications.add(mobApplication);
+//        }
+//      }
+//    }
+//
+//    return applications;
 
     null
   }
@@ -157,3 +209,5 @@ class ArticlesCmsServices extends PercussionContentServices {
       }
     }
 }
+
+
