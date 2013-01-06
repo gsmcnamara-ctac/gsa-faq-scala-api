@@ -4,12 +4,17 @@ import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.{BeforeAndAfter, FeatureSpec}
 import com.ctacorp.rhythmyx.soap.{ServicesConnector, PercussionContentServices}
-import gov.gsa.faq.api.model.{Subtopics, Topic, Topics, Article}
 import scala.collection.JavaConversions._
 import collection.mutable.ListBuffer
 import org.mockito.Mockito._
-import com.percussion.webservices.content.{PSFieldValue, PSField, PSItem, PSItemSummary}
+import com.percussion.webservices.content._
 import com.percussion.webservices.common.Reference
+import gov.gsa.faq.api.Constants
+import java.io.File
+import gov.gsa.faq.api.model.Subtopics
+import gov.gsa.faq.api.model.Topic
+import gov.gsa.faq.api.model.Topics
+import gov.gsa.faq.api.model.Article
 
 @RunWith(classOf[JUnitRunner])
 class ArticlesCmsServicesTest extends FeatureSpec with BeforeAndAfter {
@@ -17,11 +22,13 @@ class ArticlesCmsServicesTest extends FeatureSpec with BeforeAndAfter {
   val services = new ArticlesCmsServices()
   var percussionServices = mock(classOf[PercussionContentServices])
   var servicesConnector = mock(classOf[ServicesConnector])
+  var guidFactory = mock(classOf[GuidFactory])
 
   before {
     services.services = percussionServices
     services.servicesConnector = servicesConnector
-    reset(percussionServices, servicesConnector)
+    services.guidFactory = guidFactory
+    reset(percussionServices, servicesConnector, guidFactory)
   }
 
   feature("createArticle") {
@@ -38,7 +45,7 @@ class ArticlesCmsServicesTest extends FeatureSpec with BeforeAndAfter {
       fields += ("topics_subtopics" -> "topic1-subtopic1,subtopic2|topic2-subtopic3,subtopic4")
 
       val article = new Article()
-      article.body = "<![CDATA[[body]]"
+      article.body = "<![CDATA[body]]"
       article.id = "id"
       article.link = "link"
       article.rank = "rank"
@@ -59,15 +66,242 @@ class ArticlesCmsServicesTest extends FeatureSpec with BeforeAndAfter {
       assert("1234" === services.createArticle(article))
 
       verify(percussionServices).login()
-      verify(servicesConnector).configureServices(services)
+      verify(servicesConnector).configureServices(services, Constants.SERVICES_PROPS, Constants.SERVICES_PROPS_NAME)
       verify(percussionServices).logout()
+    }
+  }
+
+  feature("configureServices") {
+
+    scenario("properties file doesn't exist") {
+
+      new File(Constants.SERVICES_PROPS).delete()
+
+      val connector: ServicesConnector = new ServicesConnector()
+      services.servicesConnector = connector
+      services.configureServices
+      assert(Array("//Sites/EnterpriseInvestments/FaqArticles")===connector.getTargetFolders)
+    }
+
+    scenario("properties file exists") {
+
+      assert(new File(Constants.SERVICES_PROPS).exists)
+      val connector: ServicesConnector = new ServicesConnector()
+      services.servicesConnector = connector
+      services.configureServices
+      assert(Array("//Sites/EnterpriseInvestments/FaqArticles")===connector.getTargetFolders)
     }
   }
 
   feature("updateArticle") {
 
-    scenario("article has all fields, two topics each with 2 subtopics") {
+    scenario("no changes in item") {
 
+      val item = makeItem()
+      val article = makeArticle
+
+      when(percussionServices.loadItem(2l)).thenReturn(item)
+
+      services.updateArticle(article, "2")
+
+      verify(percussionServices).login()
+      verify(servicesConnector).configureServices(services, Constants.SERVICES_PROPS, Constants.SERVICES_PROPS_NAME)
+      verify(percussionServices).logout()
+    }
+
+    scenario("article link is different") {
+
+      val item = makeItem
+      val article = makeArticle
+      article.link = "ham"
+      var fields = makeFields
+      fields += ("link" -> "ham")
+
+      when(percussionServices.loadItem(2l)).thenReturn(item)
+      when(guidFactory.getNewRevisionGUID(2l)).thenReturn(2l)
+      when(percussionServices.updateItem(item, fields, "2".toLong)).thenReturn(true)
+
+      assert(services.updateArticle(article, "2"))
+
+      verify(percussionServices).login()
+      verify(servicesConnector).configureServices(services, Constants.SERVICES_PROPS, Constants.SERVICES_PROPS_NAME)
+      verify(percussionServices).logout()
+    }
+
+    scenario("article title is different") {
+
+      val item = makeItem
+      val article = makeArticle
+      article.title = "ham"
+      var fields = makeFields
+      fields += ("article_title" -> "ham")
+
+      when(percussionServices.loadItem(2l)).thenReturn(item)
+      when(guidFactory.getNewRevisionGUID(2l)).thenReturn(2l)
+      when(percussionServices.updateItem(item, fields, "2".toLong)).thenReturn(true)
+
+      assert(services.updateArticle(article, "2"))
+
+      verify(percussionServices).login()
+      verify(servicesConnector).configureServices(services, Constants.SERVICES_PROPS, Constants.SERVICES_PROPS_NAME)
+      verify(percussionServices).logout()
+    }
+
+    scenario("article rank is different") {
+
+      val item = makeItem
+      val article = makeArticle
+      article.rank = "ham"
+      var fields = makeFields
+      fields += ("rank" -> "ham")
+
+      when(percussionServices.loadItem(2l)).thenReturn(item)
+      when(guidFactory.getNewRevisionGUID(2l)).thenReturn(2l)
+      when(percussionServices.updateItem(item, fields, "2".toLong)).thenReturn(true)
+
+      assert(services.updateArticle(article, "2"))
+
+      verify(percussionServices).login()
+      verify(servicesConnector).configureServices(services, Constants.SERVICES_PROPS, Constants.SERVICES_PROPS_NAME)
+      verify(percussionServices).logout()
+    }
+
+    scenario("article updated is different") {
+
+      val item = makeItem
+      val article = makeArticle
+      article.updated = "ham"
+      var fields = makeFields
+      fields += ("updated" -> "ham")
+
+      when(percussionServices.loadItem(2l)).thenReturn(item)
+      when(guidFactory.getNewRevisionGUID(2l)).thenReturn(2l)
+      when(percussionServices.updateItem(item, fields, "2".toLong)).thenReturn(true)
+
+      assert(services.updateArticle(article, "2"))
+
+      verify(percussionServices).login()
+      verify(servicesConnector).configureServices(services, Constants.SERVICES_PROPS, Constants.SERVICES_PROPS_NAME)
+      verify(percussionServices).logout()
+    }
+
+    scenario("article topics is different") {
+
+      val item = makeItem
+      val article = makeArticle
+      article.topics = new Topics()
+      var fields = makeFields
+      fields += ("topics_subtopics" -> "")
+
+      when(percussionServices.loadItem(2l)).thenReturn(item)
+      when(guidFactory.getNewRevisionGUID(2l)).thenReturn(2l)
+      when(percussionServices.updateItem(item, fields, "2".toLong)).thenReturn(true)
+
+      assert(services.updateArticle(article, "2"))
+
+      verify(percussionServices).login()
+      verify(servicesConnector).configureServices(services, Constants.SERVICES_PROPS, Constants.SERVICES_PROPS_NAME)
+      verify(percussionServices).logout()
+    }
+
+    def makeFields() : Map[String, Object] = {
+      var fields = Map[String, Object]()
+      fields += ("id" -> "id")
+      fields += ("link" -> "link")
+      fields += ("article_title" -> "title")
+      fields += ("body" -> "body")
+      fields += ("rank" -> "rank")
+      fields += ("updated" -> "updated")
+      fields += ("topics_subtopics" -> "topic1-subtopic1,subtopic2|topic2-subtopic3,subtopic4")
+      fields
+    }
+  }
+
+  def makeTopicsField: PSField = {
+    val topicsField = new PSField()
+    topicsField.setName("topics_subtopics")
+    val topicsValue: PSFieldValue = new PSFieldValue()
+    topicsValue.setRawData("topic1-subtopic1,subtopic2|topic2-subtopic3,subtopic4")
+    topicsField.setPSFieldValue(Array(topicsValue))
+    topicsField
+  }
+
+  def makeItem() : PSItem = {
+
+    val idField = new PSField()
+    idField.setName("id")
+    val idValue = new PSFieldValue()
+    idValue.setRawData("id")
+    idField.setPSFieldValue(Array[PSFieldValue](idValue))
+
+    val linkField = new PSField()
+    linkField.setName("link")
+    val linkValue = new PSFieldValue()
+    linkValue.setRawData("link")
+    linkField.setPSFieldValue(Array[PSFieldValue](linkValue))
+
+    val titleField = new PSField()
+    titleField.setName("article_title")
+    val titleValue = new PSFieldValue()
+    titleValue.setRawData("title")
+    titleField.setPSFieldValue(Array[PSFieldValue](titleValue))
+
+    val bodyField = new PSField()
+    bodyField.setName("body")
+    val bodyValue = new PSFieldValue()
+    bodyValue.setRawData("body")
+    bodyField.setPSFieldValue(Array[PSFieldValue](bodyValue))
+
+    val rankField = new PSField()
+    rankField.setName("rank")
+    val rankValue = new PSFieldValue()
+    rankValue.setRawData("rank")
+    rankField.setPSFieldValue(Array[PSFieldValue](rankValue))
+
+    val updatedField = new PSField()
+    updatedField.setName("updated")
+    val updatedValue = new PSFieldValue()
+    updatedValue.setRawData("updated")
+    updatedField.setPSFieldValue(Array[PSFieldValue](updatedValue))
+
+    val topicsField: PSField = makeTopicsField
+
+    val item: PSItem = mock(classOf[PSItem])
+    when(item.getFields).thenReturn(Array[PSField](idField, linkField, titleField, bodyField, rankField, updatedField, topicsField))
+    item
+  }
+
+  def makeArticle : Article = {
+    val article = new Article()
+    article.body = "<![CDATA[body]]"
+    article.id = "id"
+    article.link = "link"
+    article.rank = "rank"
+    article.title = "title"
+    article.updated = "updated"
+    article.topics = new TopicsConverter().convertField(makeTopicsField)
+    article
+  }
+
+  feature("getArticle") {
+
+    scenario("load 1 item from the CMS and return a single Articles") {
+
+      val item = makeItem
+      when(percussionServices.loadItem(2l)).thenReturn(item)
+
+      val article = services.getArticle(2l)
+      assert(article.body === "<![CDATA[body]]")
+      assert(article.id === "id")
+      assert(article.link === "link")
+      assert(article.rank === "rank")
+      assert(article.title === "title")
+      assert(article.updated === "updated")
+      assert(article.topics === new TopicsConverter().convertField(makeTopicsField))
+
+      verify(percussionServices).login()
+      verify(servicesConnector).configureServices(services, Constants.SERVICES_PROPS, Constants.SERVICES_PROPS_NAME)
+      verify(percussionServices).logout()
     }
   }
 
@@ -134,7 +368,7 @@ class ArticlesCmsServicesTest extends FeatureSpec with BeforeAndAfter {
 
       when(percussionServices.loadItem(1234)).thenReturn(item)
 
-      val articles = services.getAll()
+      val articles = services.getAllArticles()
       assert(1 === articles.size)
       assert("id" === articles(0).id)
       assert("link" === articles(0).link)
@@ -155,7 +389,7 @@ class ArticlesCmsServicesTest extends FeatureSpec with BeforeAndAfter {
       assert("subtopic4" === topics.topic.get(1).subtopics.subtopic.get(1))
 
       verify(percussionServices).login()
-      verify(servicesConnector).configureServices(services)
+      verify(servicesConnector).configureServices(services, Constants.SERVICES_PROPS, Constants.SERVICES_PROPS_NAME)
       verify(percussionServices).logout()
     }
   }
