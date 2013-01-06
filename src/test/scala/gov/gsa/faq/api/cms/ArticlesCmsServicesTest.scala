@@ -22,14 +22,14 @@ class ArticlesCmsServicesTest extends FeatureSpec with BeforeAndAfter {
   before {
     services.services = percussionServices
     services.servicesConnector = servicesConnector
-    reset(percussionServices,servicesConnector)
+    reset(percussionServices, servicesConnector)
   }
 
   feature("createArticle") {
 
     scenario("article has all fields, two topics each with 2 subtopics") {
 
-      var fields = Map[String,Object]()
+      var fields = Map[String, Object]()
       fields += ("id" -> "id")
       fields += ("link" -> "link")
       fields += ("article_title" -> "title")
@@ -48,8 +48,8 @@ class ArticlesCmsServicesTest extends FeatureSpec with BeforeAndAfter {
 
       val topics = new Topics()
       var topicList = new ListBuffer[Topic]
-      topicList += new Topic("topic1",new Subtopics(List("subtopic1","subtopic2")))
-      topicList += new Topic("topic2",new Subtopics(List("subtopic3","subtopic4")))
+      topicList += new Topic("topic1", new Subtopics(List("subtopic1", "subtopic2")))
+      topicList += new Topic("topic2", new Subtopics(List("subtopic3", "subtopic4")))
       topics.topic = topicList.toList
 
       article.topics = topics
@@ -57,7 +57,7 @@ class ArticlesCmsServicesTest extends FeatureSpec with BeforeAndAfter {
       when(servicesConnector.getTargetFolders).thenReturn(Array("targetFolder"))
       when(percussionServices.createItem(fields, "targetFolder", "faqArticle")).thenReturn(1234)
 
-      assert("1234"===services.createArticle(article))
+      assert("1234" === services.createArticle(article))
 
       verify(percussionServices).login()
       verify(servicesConnector).configureServices(services)
@@ -65,7 +65,14 @@ class ArticlesCmsServicesTest extends FeatureSpec with BeforeAndAfter {
     }
   }
 
-  feature("getAll") {
+  feature("updateArticle") {
+
+    scenario("article has all fields, two topics each with 2 subtopics") {
+
+    }
+  }
+
+  feature("getAllArticles") {
 
     scenario("load 1 items from the CMS and return a List of 1 Articles") {
 
@@ -124,29 +131,29 @@ class ArticlesCmsServicesTest extends FeatureSpec with BeforeAndAfter {
       topicsValue.setRawData("topic1-subtopic1,subtopic2|topic2-subtopic3,subtopic4")
       topicsField.setPSFieldValue(Array(topicsValue))
 
-      when(item.getFields).thenReturn(Array[PSField](idField,linkField,titleField,bodyField,rankField,updatedField,topicsField))
+      when(item.getFields).thenReturn(Array[PSField](idField, linkField, titleField, bodyField, rankField, updatedField, topicsField))
 
       when(percussionServices.loadItem(1234)).thenReturn(item)
 
       val articles = services.getAll()
-      assert(1===articles.size)
-      assert("id"===articles(0).id)
-      assert("link"===articles(0).link)
-      assert("body"===articles(0).body)
-      assert("rank"===articles(0).rank)
-      assert("title"===articles(0).title)
-      assert("updated"===articles(0).updated)
+      assert(1 === articles.size)
+      assert("id" === articles(0).id)
+      assert("link" === articles(0).link)
+      assert("body" === articles(0).body)
+      assert("rank" === articles(0).rank)
+      assert("title" === articles(0).title)
+      assert("updated" === articles(0).updated)
 
       val topics = articles(0).topics
-      assert(2===topics.topic.size)
-      assert("topic1"===topics.topic.get(0).name)
-      assert(2===topics.topic.get(0).subtopics.subtopic.size)
-      assert("subtopic1"===topics.topic.get(0).subtopics.subtopic.get(0))
-      assert("subtopic2"===topics.topic.get(0).subtopics.subtopic.get(1))
-      assert("topic2"===topics.topic.get(1).name)
-      assert(2===topics.topic.get(1).subtopics.subtopic.size)
-      assert("subtopic3"===topics.topic.get(1).subtopics.subtopic.get(0))
-      assert("subtopic4"===topics.topic.get(1).subtopics.subtopic.get(1))
+      assert(2 === topics.topic.size)
+      assert("topic1" === topics.topic.get(0).name)
+      assert(2 === topics.topic.get(0).subtopics.subtopic.size)
+      assert("subtopic1" === topics.topic.get(0).subtopics.subtopic.get(0))
+      assert("subtopic2" === topics.topic.get(0).subtopics.subtopic.get(1))
+      assert("topic2" === topics.topic.get(1).name)
+      assert(2 === topics.topic.get(1).subtopics.subtopic.size)
+      assert("subtopic3" === topics.topic.get(1).subtopics.subtopic.get(0))
+      assert("subtopic4" === topics.topic.get(1).subtopics.subtopic.get(1))
 
       verify(percussionServices).login()
       verify(servicesConnector).configureServices(services)
@@ -168,9 +175,9 @@ class ArticlesCmsServicesTest extends FeatureSpec with BeforeAndAfter {
 
       val topics = new Topics()
       var topicList = new ListBuffer[Topic]
-      topicList += new Topic("topic1",null)
-      topicList += new Topic("topic2",new Subtopics(List()))
-      topicList += new Topic("topic3",new Subtopics(null))
+      topicList += new Topic("topic1", null)
+      topicList += new Topic("topic2", new Subtopics(List()))
+      topicList += new Topic("topic3", new Subtopics(null))
       topics.topic = topicList.toList
 
       assert("topic1|topic2|topic3" === services.makeTopicsString(topics))
@@ -180,8 +187,8 @@ class ArticlesCmsServicesTest extends FeatureSpec with BeforeAndAfter {
 
       val topics = new Topics()
       var topicList = new ListBuffer[Topic]
-      topicList += new Topic("topic1",new Subtopics(List("subtopic1","subtopic2")))
-      topicList += new Topic("topic2",new Subtopics(List("subtopic3","subtopic4")))
+      topicList += new Topic("topic1", new Subtopics(List("subtopic1", "subtopic2")))
+      topicList += new Topic("topic2", new Subtopics(List("subtopic3", "subtopic4")))
       topics.topic = topicList.toList
 
       assert("topic1-subtopic1,subtopic2|topic2-subtopic3,subtopic4" === services.makeTopicsString(topics))
@@ -191,31 +198,35 @@ class ArticlesCmsServicesTest extends FeatureSpec with BeforeAndAfter {
 
 class ArticlesCmsServices extends PercussionContentServices with LogHelper {
 
-   var services : PercussionContentServices = this
-   var servicesConnector: ServicesConnector = _
-   var converterUtils : RhythmyxContentTypeFieldUtils = new RhythmyxContentTypeFieldUtils()
+  var services: PercussionContentServices = this
+  var servicesConnector: ServicesConnector = _
+  var converterUtils: RhythmyxContentTypeFieldUtils = new RhythmyxContentTypeFieldUtils()
 
-    def createArticle(article:Article) : String = {
+  def createArticle(article: Article): String = {
 
-      var fields = Map[String,Object]()
-      fields += ("id" -> article.id)
-      fields += ("link" -> article.link)
-      fields += ("article_title" -> article.title)
-      fields += ("body" -> article.body.replace("<![CDATA[[","").dropRight("]]".length))
-      fields += ("rank" -> article.rank)
-      fields += ("updated" -> article.updated)
-      fields += ("topics_subtopics" -> makeTopicsString(article.topics))
+    var fields = Map[String, Object]()
+    fields += ("id" -> article.id)
+    fields += ("link" -> article.link)
+    fields += ("article_title" -> article.title)
+    fields += ("body" -> article.body.replace("<![CDATA[[", "").dropRight("]]".length))
+    fields += ("rank" -> article.rank)
+    fields += ("updated" -> article.updated)
+    fields += ("topics_subtopics" -> makeTopicsString(article.topics))
 
-      servicesConnector.configureServices(this)
-      val targetFolder = servicesConnector.getTargetFolders()(0)
+    servicesConnector.configureServices(this)
+    val targetFolder = servicesConnector.getTargetFolders()(0)
 
-      services.login()
-      val id = services.createItem(fields, targetFolder, "faqArticle").toString
-      services.logout()
-      id
-    }
+    services.login()
+    val id = services.createItem(fields, targetFolder, "faqArticle").toString
+    services.logout()
+    id
+  }
 
-  def getAll() : List[Article] = {
+  def updateArticle(article: Article, id: Long) : String = {
+
+  }
+
+  def getAll(): List[Article] = {
 
     servicesConnector.configureServices(this)
     val targetFolder = servicesConnector.getTargetFolders()(0)
@@ -223,18 +234,18 @@ class ArticlesCmsServices extends PercussionContentServices with LogHelper {
     try {
       services.login()
 
-      val summaries : Array[PSItemSummary] = services.findFolderChildren(targetFolder)
-      if (summaries.length>0) {
+      val summaries: Array[PSItemSummary] = services.findFolderChildren(targetFolder)
+      if (summaries.length > 0) {
 
         val articles = new ListBuffer[Article]()
 
-        for(summary <- summaries) {
-          val contentTypeName = (summary:PSItemSummary) => {
+        for (summary <- summaries) {
+          val contentTypeName = (summary: PSItemSummary) => {
             val contentType = summary.getContentType
-            if (contentType==null) {
+            if (contentType == null) {
               logger.error("ContentType was null for PSItemSummary with id=" + summary.getId())
             } else {
-              if (contentType.getName==null||contentType.getName.length==0) {
+              if (contentType.getName == null || contentType.getName.length == 0) {
                 logger.error("ContentType.name was null for PSItemSummary with id=" + summary.getId())
                 null
               } else {
@@ -242,25 +253,25 @@ class ArticlesCmsServices extends PercussionContentServices with LogHelper {
               }
             }
           }
-          if (contentTypeName(summary)=="faqArticle") {
+          if (contentTypeName(summary) == "faqArticle") {
             val psItem = services.loadItem(summary.getId)
             val fields = psItem.getFields
             val article: Article = new Article()
-            for(field <- fields) {
+            for (field <- fields) {
               val data: String = field.getPSFieldValue(0).getRawData
-              if(field.getName=="id") {
+              if (field.getName == "id") {
                 article.id = data
-              } else if(field.getName=="link") {
+              } else if (field.getName == "link") {
                 article.link = data
-              } else if(field.getName=="body") {
+              } else if (field.getName == "body") {
                 article.body = data
-              } else if(field.getName=="rank") {
+              } else if (field.getName == "rank") {
                 article.rank = data
-              } else if(field.getName=="updated") {
+              } else if (field.getName == "updated") {
                 article.updated = data
-              } else if(field.getName=="article_title") {
+              } else if (field.getName == "article_title") {
                 article.title = data
-              } else if(field.getName=="topics_subtopics") {
+              } else if (field.getName == "topics_subtopics") {
                 article.topics = new TopicsConverter().convertField(field)
               }
             }
@@ -280,32 +291,32 @@ class ArticlesCmsServices extends PercussionContentServices with LogHelper {
     }
   }
 
-    def makeTopicsString (topics:Topics) : String = {
-      if(topics!=null) {
-        val topicList = topics.topic
-        var topicsString : String = ""
-        if(topicList!=null && topicList.size()>0) {
-          for(topic <- topicList) {
-            topicsString = topicsString + topic.name
-            if (topic.subtopics!=null) {
-              val subtopics = topic.subtopics.subtopic
-              if(subtopics!=null && subtopics.size()>0) {
-                topicsString = topicsString + "-"
-                for(subtopic <- subtopics) {
-                  topicsString = topicsString + subtopic + ","
-                }
-                topicsString = topicsString.dropRight(1)
+  def makeTopicsString(topics: Topics): String = {
+    if (topics != null) {
+      val topicList = topics.topic
+      var topicsString: String = ""
+      if (topicList != null && topicList.size() > 0) {
+        for (topic <- topicList) {
+          topicsString = topicsString + topic.name
+          if (topic.subtopics != null) {
+            val subtopics = topic.subtopics.subtopic
+            if (subtopics != null && subtopics.size() > 0) {
+              topicsString = topicsString + "-"
+              for (subtopic <- subtopics) {
+                topicsString = topicsString + subtopic + ","
               }
+              topicsString = topicsString.dropRight(1)
             }
-            topicsString = topicsString + "|"
           }
-          topicsString = topicsString.dropRight(1)
+          topicsString = topicsString + "|"
         }
-        topicsString
-      } else {
-        ""
+        topicsString = topicsString.dropRight(1)
       }
+      topicsString
+    } else {
+      ""
     }
+  }
 }
 
 

@@ -6,11 +6,12 @@ import gov.gsa.rest.api.dao._
 import gov.gsa.rest.api.model.{Sort, QueryParameter}
 import gov.gsa.faq.api.model._
 import scala.collection.JavaConversions._
-import org.springframework.jdbc.core.JdbcTemplate
+import org.springframework.jdbc.core.{PreparedStatementCreator, JdbcTemplate}
 import org.apache.commons.lang.StringUtils
 import collection.mutable.ListBuffer
 import org.springframework.jdbc.support.rowset.SqlRowSet
 import gov.gsa.faq.api.model.Article
+import java.sql.{PreparedStatement, Connection}
 
 class FaqDao(val dataSource: DataSource) extends LogHelper {
 
@@ -20,6 +21,14 @@ class FaqDao(val dataSource: DataSource) extends LogHelper {
   val allowedResultFilters = new ResultFilterImpl().getResultFilters()
   var jdbcTemplate : JdbcTemplate = new JdbcTemplate(dataSource)
   val sqlHelper : SQLHelper = new SQLHelper()
+
+  def insertCmsId(id:String, cmsId:String) {
+    jdbcTemplate.update(new PreparedStatementCreator {
+      def createPreparedStatement(connection: Connection): PreparedStatement = {
+        val ps: PreparedStatement = connection.prepareStatement("insert into articles (id, link, title, body, rank, updated) values (?,?,?,?,?,?) ")
+      }
+    })
+  }
 
   def getArticles(queryParamString:String,resultFilterString:String,sortString:String) : Seq[Article] = {
 
