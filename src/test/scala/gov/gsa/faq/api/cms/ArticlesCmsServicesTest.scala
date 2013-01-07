@@ -96,37 +96,23 @@ class ArticlesCmsServicesTest extends FeatureSpec with BeforeAndAfter {
 
   feature("updateArticle") {
 
-    scenario("update success") {
+    scenario("item exists") {
 
       val item = makeItem()
       val article = makeArticle
 
       when(percussionServices.loadItem(2l)).thenReturn(item)
-      when(percussionServices.updateItem(item, makeFields, guidFactory.getNewRevisionGUID(2l))).thenReturn(true)
+      when(guidFactory.getNewRevisionGUID(2l)).thenReturn(123)
 
-      assert(services.updateArticle(article, "2"))
+      assert("123" === services.updateArticle(article, "2"))
 
       verify(percussionServices).login()
       verify(servicesConnector).configureServices(services, Constants.DATA_DIR, Constants.SERVICES_PROPS_NAME)
       verify(percussionServices).logout()
     }
 
-    scenario("update failure") {
+    scenario("item doesn't exist") {
 
-      val item = makeItem()
-      val article = makeArticle
-
-      when(percussionServices.loadItem(2l)).thenReturn(item)
-      when(percussionServices.updateItem(item, makeFields, guidFactory.getNewRevisionGUID(2l))).thenThrow(new Exception("meh"))
-
-      assert(!services.updateArticle(article, "2"))
-
-      verify(percussionServices).login()
-      verify(servicesConnector).configureServices(services, Constants.DATA_DIR, Constants.SERVICES_PROPS_NAME)
-      verify(percussionServices).logout()
-    }
-
-    def makeFields(): Map[String, Object] = {
       var fields = Map[String, Object]()
       fields += ("id" -> "id")
       fields += ("link" -> "link")
@@ -134,8 +120,45 @@ class ArticlesCmsServicesTest extends FeatureSpec with BeforeAndAfter {
       fields += ("body" -> "body")
       fields += ("rank" -> "rank")
       fields += ("updated" -> "updated")
+      fields += ("sys_title" -> "title")
       fields += ("topics_subtopics" -> "topic1-subtopic1,subtopic2|topic2-subtopic3,subtopic4")
-      fields
+
+      val article = makeArticle
+
+      when(percussionServices.loadItem(2l)).thenReturn(null)
+      when(servicesConnector.getTargetFolders).thenReturn(Array("targetFolder"))
+      when(percussionServices.createItem(fields, "targetFolder", "faqArticle")).thenReturn(1234l)
+
+      assert("1234" === services.updateArticle(article, "2"))
+
+      verify(percussionServices, times(2)).login()
+      verify(servicesConnector, times(2)).configureServices(services, Constants.DATA_DIR, Constants.SERVICES_PROPS_NAME)
+      verify(percussionServices, times(2)).logout()
+    }
+
+    scenario("loadItem throws") {
+
+      var fields = Map[String, Object]()
+      fields += ("id" -> "id")
+      fields += ("link" -> "link")
+      fields += ("article_title" -> "title")
+      fields += ("body" -> "body")
+      fields += ("rank" -> "rank")
+      fields += ("updated" -> "updated")
+      fields += ("sys_title" -> "title")
+      fields += ("topics_subtopics" -> "topic1-subtopic1,subtopic2|topic2-subtopic3,subtopic4")
+
+      val article = makeArticle
+
+      when(percussionServices.loadItem(2l)).thenThrow(new Exception("meh"))
+      when(servicesConnector.getTargetFolders).thenReturn(Array("targetFolder"))
+      when(percussionServices.createItem(fields, "targetFolder", "faqArticle")).thenReturn(1234l)
+
+      assert("1234" === services.updateArticle(article, "2"))
+
+      verify(percussionServices, times(2)).login()
+      verify(servicesConnector, times(2)).configureServices(services, Constants.DATA_DIR, Constants.SERVICES_PROPS_NAME)
+      verify(percussionServices, times(2)).logout()
     }
   }
 
@@ -190,6 +213,7 @@ class ArticlesCmsServicesTest extends FeatureSpec with BeforeAndAfter {
 
     val item: PSItem = mock(classOf[PSItem])
     when(item.getFields).thenReturn(Array[PSField](idField, linkField, titleField, bodyField, rankField, updatedField, topicsField))
+    when(item.getId).thenReturn(2l)
     item
   }
 
@@ -350,7 +374,3 @@ class ArticlesCmsServicesTest extends FeatureSpec with BeforeAndAfter {
     }
   }
 }
-
-
-
-

@@ -35,7 +35,8 @@ class ArticlesCmsServices extends PercussionContentServices with LogHelper {
     fields += ("id" -> article.id)
     fields += ("link" -> article.link)
     fields += ("article_title" -> article.title)
-    fields += ("body" -> article.body.replace("<![CDATA[", "").dropRight("]]".length))
+    val body = article.body.replace("<![CDATA[", "").dropRight("]]".length)
+    fields += ("body" -> body)
     fields += ("rank" -> article.rank)
     fields += ("updated" -> article.updated)
     fields += ("topics_subtopics" -> makeTopicsString(article.topics))
@@ -51,27 +52,38 @@ class ArticlesCmsServices extends PercussionContentServices with LogHelper {
     servicesConnector.configureServices(this, Constants.DATA_DIR, Constants.SERVICES_PROPS_NAME)
   }
 
-  def updateArticle(article: Article, id: String): Boolean = {
+  def updateArticle(article: Article, id: String): String = {
 
     configureServices
 
+    var item: PSItem = null
     try {
-
       services.login()
-
-      val item: PSItem = services.loadItem(id.toLong)
-      services.updateItem(item, mapArticleToFields(article), guidFactory.getNewRevisionGUID(id.toLong))
-      true
+      item = services.loadItem(id.toLong)
     } catch {
       case e: Exception => {
         logger.error(e.getMessage)
-        false
       }
-    } finally {
+    }
+    if (item == null) {
+      services.logout()
+      createArticle(article).toString
+    } else {
       try {
-        services.logout()
+        val guid = guidFactory.getNewRevisionGUID(item.getId)
+        services.updateItem(item, mapArticleToFields(article), guid)
+        guid.toString
       } catch {
-        case e: Exception => (logger.error(e.getMessage))
+        case e: Exception => {
+          logger.error(e.getMessage)
+          null
+        }
+      } finally {
+        try {
+          services.logout()
+        } catch {
+          case e: Exception => (logger.error(e.getMessage))
+        }
       }
     }
   }

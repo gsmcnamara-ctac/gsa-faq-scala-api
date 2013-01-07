@@ -1,6 +1,5 @@
 package gov.gsa.faq.api.cms
 
-import com.typesafe.config.ConfigFactory
 import org.apache.commons.io.FileUtils
 import java.io.File
 import org.scalatest.junit.JUnitRunner
@@ -13,11 +12,13 @@ import org.apache.commons.lang.SystemUtils
 class CmsIdMapperTest extends FeatureSpec with BeforeAndAfter {
 
   val mapper = new CmsIdMapper()
-  val file = new File(SystemUtils.getJavaIoTmpDir, "id.map")
+  val file = SystemUtils.getJavaIoTmpDir
 
   before {
-    FileUtils.writeStringToFile(file, "1=2" + "\n")
-    FileUtils.writeStringToFile(file, "3=4" + "\n", true)
+    FileUtils.touch(new File(file, "1.2"))
+    FileUtils.touch(new File(file, "3.4"))
+    FileUtils.deleteQuietly(new File(file, "5.6"))
+    FileUtils.deleteQuietly(new File(file, "5.7"))
     mapper.location = file
   }
 
@@ -28,28 +29,33 @@ class CmsIdMapperTest extends FeatureSpec with BeforeAndAfter {
     }
 
     scenario("id exists") {
-      FileUtils.writeStringToFile(file, "5=6" + "\n")
+      FileUtils.touch(new File(file, "5.6"))
       assert("6" === mapper.get("5"))
+    }
+  }
+
+  feature("delete") {
+
+    scenario("file exists") {
+
+      FileUtils.touch(new File(file, "5.6"))
+      mapper.delete("5")
+      assert(!new File(file, "5.6").exists())
     }
   }
 
   feature("set") {
 
     scenario("id does not exists") {
-      mapper.add("5", "6")
-      val conf = ConfigFactory.parseFile(file)
-      assert("6" === conf.getString("5"))
-      val fileString = FileUtils.readFileToString(file)
-      assert("1=2\n3=4\n5=6\n" === fileString)
+      mapper.put("5", "6")
+      assert(new File(file, "5.6").exists())
     }
 
     scenario("id already exists") {
-      FileUtils.writeStringToFile(file, "5=6" + "\n", true)
-      mapper.add("5", "6")
-      val conf = ConfigFactory.parseFile(file)
-      assert("6" === conf.getString("5"))
-      val fileString = FileUtils.readFileToString(file)
-      assert("1=2\n3=4\n5=6\n" === fileString)
+      FileUtils.touch(new File(file, "5.6"))
+      mapper.put("5", "7")
+      assert(new File(file, "5.7").exists())
+      assert(!new File(file, "5.6").exists())
     }
   }
 }

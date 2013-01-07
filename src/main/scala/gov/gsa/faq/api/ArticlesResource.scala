@@ -79,13 +79,15 @@ trait ArticlesResource extends RestResourceUtil with RestAPI with LogHelper {
             result.operation = "insert"
             val _cmsId = cmsServices.createArticle(article)
             result.result = if (_cmsId == null) "failure" else "success"
-            cmsIdMapper.add(article.id, _cmsId)
+            cmsIdMapper.put(article.id, _cmsId)
           } else {
             result.operation = "update"
-            val success = cmsServices.updateArticle(article, cmsId)
-            result.result = if (success) "success" else "failure"
-            if (!success) {
+            val id = cmsServices.updateArticle(article, cmsId)
+            result.result = if (id != null) "success" else "failure"
+            if (id == null) {
               logger.error("update of article with id=" + article.id + " failed")
+            } else {
+              cmsIdMapper.put(article.id, id)
             }
           }
           results += result

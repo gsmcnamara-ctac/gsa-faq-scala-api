@@ -4,7 +4,7 @@ import cms.{CmsIdMapper, ArticlesCmsServices}
 import dao.FaqDao
 import model.{Results, Articles, Article, Result}
 import org.scalatest.{FeatureSpec, BeforeAndAfter}
-import gov.gsa.rest.api.{RangeFinder}
+import gov.gsa.rest.api.RangeFinder
 import javax.servlet.http.HttpServletRequest
 import javax.ws.rs._
 import org.apache.commons.io.FileUtils
@@ -21,7 +21,7 @@ import org.scalatest.junit.JUnitRunner
 @RunWith(classOf[JUnitRunner])
 class ArticlesResourceTest extends FeatureSpec with BeforeAndAfter {
 
-  var articlesResource : ArticlesResource = _
+  var articlesResource: ArticlesResource = _
   val uriInfo = mock(classOf[UriInfo])
   val request = mock(classOf[HttpServletRequest])
   val rangeFinder = mock(classOf[RangeFinder])
@@ -39,7 +39,7 @@ class ArticlesResourceTest extends FeatureSpec with BeforeAndAfter {
     articlesResource.rangeFinder = rangeFinder
     articlesResource.cmsServices = cmsServices
     articlesResource.cmsIdMapper = cmsIdMapper
-    reset(uriInfo,request,rangeFinder,cmsServices,cmsIdMapper)
+    reset(uriInfo, request, rangeFinder, cmsServices, cmsIdMapper)
 
     when(uriInfo.getRequestUri()).thenReturn(new URI("http://pants.nation.org:8080/usagovapi/contacts.json/contacts?pizza=cheese"))
     when(request.getRemoteAddr()).thenReturn("hamsandwich.com")
@@ -50,24 +50,25 @@ class ArticlesResourceTest extends FeatureSpec with BeforeAndAfter {
     scenario("no query params, result filters or sorts") {
       when(rangeFinder.getRange(2020, "items=1-1999")).thenReturn(new gov.gsa.rest.api.Range(1, 1999, 2020))
 
-      val response : Response = articlesResource.getResource(null, null, null,"items=1-1999")
-      val metadata : MultivaluedMap[String,Object] = response.getMetadata()
+      val response: Response = articlesResource.getResource(null, null, null, "items=1-1999")
+      val metadata: MultivaluedMap[String, Object] = response.getMetadata()
       assert("1-1999/2020" === metadata.get("X-Content-Range").get(0))
 
       val articles = response.getEntity().asInstanceOf[Articles].article
       assert(1999 === articles.size)
 
-      var article : Article = null
-      articles.foreach { _article =>
-        if(_article.id == "9666") {
-          article = _article
-        }
+      var article: Article = null
+      articles.foreach {
+        _article =>
+          if (_article.id == "9666") {
+            article = _article
+          }
       }
 
       article should not be (null)
       assert("http://answers.usa.gov/system/web/view/selfservice/templates/USAgov/egredirect.jsp?p_faq_id=9666" === article.link)
       assert(article.title.matches("Fish and Wildlife Service:.*Student Employment Programs"))
-      assert("<![CDATA["+Source.fromInputStream(getClass().getResourceAsStream("/9666.body")).getLines().mkString("\n")+"]]" === article.body)
+      assert("<![CDATA[" + Source.fromInputStream(getClass().getResourceAsStream("/9666.body")).getLines().mkString("\n") + "]]" === article.body)
       assert(50.43334 === article.rank.toDouble)
       assert("Nov 26 2012 04:58:24:000PM" === article.updated)
 
@@ -99,26 +100,47 @@ class ArticlesResourceTest extends FeatureSpec with BeforeAndAfter {
       when(cmsIdMapper.get("456")).thenReturn("654")
 
       when(cmsServices.createArticle(article1)).thenReturn("321")
-      when(cmsServices.updateArticle(article2,"654")).thenReturn(false)
+      when(cmsServices.updateArticle(article2, "654")).thenReturn("999")
 
-      val response = articlesResource.updateCmsArticles(dao,"123|456")
-      val results : java.util.List[Result] = response.getEntity.asInstanceOf[Results].result
-      assert(2===results.size)
-      assert("123"===results(0).id)
-      assert("insert"===results(0).operation)
-      assert("success"===results(0).result)
-      assert("456"===results(1).id)
-      assert("update"===results(1).operation)
-      assert("failure"===results(1).result)
+      val response = articlesResource.updateCmsArticles(dao, "123|456")
+      val results: java.util.List[Result] = response.getEntity.asInstanceOf[Results].result
+      assert(2 === results.size)
+      assert("123" === results(0).id)
+      assert("insert" === results(0).operation)
+      assert("success" === results(0).result)
+      assert("456" === results(1).id)
+      assert("update" === results(1).operation)
+      assert("success" === results(1).result)
 
-      verify(cmsIdMapper).add("123","321")
+      verify(cmsIdMapper).put("123", "321")
+      verify(cmsIdMapper).put("456", "999")
+    }
+
+    scenario("update article failed") {
+
+      val dao = mock(classOf[FaqDao])
+
+      val article1 = new Article()
+      article1.id = "123"
+
+      when(dao.getArticle("123")).thenReturn(article1)
+      when(cmsIdMapper.get("123")).thenReturn(null)
+
+      when(cmsServices.createArticle(article1)).thenReturn(null)
+
+      val response = articlesResource.updateCmsArticles(dao, "123")
+      val results: java.util.List[Result] = response.getEntity.asInstanceOf[Results].result
+      assert(1 === results.size)
+      assert("123" === results(0).id)
+      assert("insert" === results(0).operation)
+      assert("failure" === results(0).result)
     }
 
     scenario("article ids string is empty or null") {
-      var response = articlesResource.updateCmsArticles(null,null)
-      assert(0===response.getEntity.asInstanceOf[Results].result.size())
-      response = articlesResource.updateCmsArticles(null,"")
-      assert(0===response.getEntity.asInstanceOf[Results].result.size())
+      var response = articlesResource.updateCmsArticles(null, null)
+      assert(0 === response.getEntity.asInstanceOf[Results].result.size())
+      response = articlesResource.updateCmsArticles(null, "")
+      assert(0 === response.getEntity.asInstanceOf[Results].result.size())
     }
   }
 }
