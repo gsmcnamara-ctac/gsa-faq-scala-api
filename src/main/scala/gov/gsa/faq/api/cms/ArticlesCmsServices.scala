@@ -18,7 +18,8 @@ class ArticlesCmsServices extends PercussionContentServices with LogHelper {
 
   def createArticle(article: Article): String = {
 
-    val fields = mapArticleToFields(article)
+    var fields = mapArticleToFields(article)
+    fields += ("sys_title" -> article.title)
 
     configureServices
     val targetFolder = servicesConnector.getTargetFolders()(0)
@@ -28,7 +29,6 @@ class ArticlesCmsServices extends PercussionContentServices with LogHelper {
     services.logout()
     id
   }
-
 
   def mapArticleToFields(article: Article): Map[String, Object] = {
     var fields = Map[String, Object]()

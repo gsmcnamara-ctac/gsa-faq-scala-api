@@ -42,6 +42,7 @@ class ArticlesCmsServicesTest extends FeatureSpec with BeforeAndAfter {
       fields += ("body" -> "body")
       fields += ("rank" -> "rank")
       fields += ("updated" -> "updated")
+      fields += ("sys_title" -> "title")
       fields += ("topics_subtopics" -> "topic1-subtopic1,subtopic2|topic2-subtopic3,subtopic4")
 
       val article = new Article()
