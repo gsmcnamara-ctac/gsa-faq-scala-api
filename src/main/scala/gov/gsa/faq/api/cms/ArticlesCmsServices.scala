@@ -2,7 +2,7 @@ package gov.gsa.faq.api.cms
 
 import com.ctacorp.rhythmyx.soap.{ServicesConnector, PercussionContentServices}
 import gov.gsa.faq.api.model.{Topics, Article}
-import com.percussion.webservices.content.{PSField, PSItem, PSItemSummary}
+import com.percussion.webservices.content.{PSItem, PSItemSummary}
 import gov.gsa.faq.api.{Constants, LogHelper}
 import collection.mutable.ListBuffer
 import scala.collection.JavaConversions._
@@ -60,15 +60,8 @@ class ArticlesCmsServices extends PercussionContentServices with LogHelper {
       services.login()
 
       val item: PSItem = services.loadItem(id.toLong)
-      val fields = item.getFields
-
-      var updated = false
-      if (isDifferent(fields, article)) {
-        updated = services.updateItem(item, mapArticleToFields(article), guidFactory.getNewRevisionGUID(id.toLong))
-      } else {
-        updated = true
-      }
-      updated
+      services.updateItem(item, mapArticleToFields(article), guidFactory.getNewRevisionGUID(id.toLong))
+      true
     } catch {
       case e: Exception => {
         logger.error(e.getMessage)
@@ -81,42 +74,6 @@ class ArticlesCmsServices extends PercussionContentServices with LogHelper {
         case e: Exception => (logger.error(e.getMessage))
       }
     }
-  }
-
-  def isDifferent(fields: Array[PSField], article: Article): Boolean = {
-    var isDifferent = false
-    for (field <- fields) {
-      val values = field.getPSFieldValue
-      if (values != null && values.length > 0) {
-        val data: String = values(0).getRawData
-        if (field.getName == "link") {
-          if (article.link != data) {
-            isDifferent = true
-          }
-        } else if (field.getName == "body") {
-          if (article.body != "<![CDATA[" + data + "]]") {
-            isDifferent = true
-          }
-        } else if (field.getName == "rank") {
-          if (article.rank != data) {
-            isDifferent = true
-          }
-        } else if (field.getName == "updated") {
-          if (article.updated != data) {
-            isDifferent = true
-          }
-        } else if (field.getName == "article_title") {
-          if (article.title != data) {
-            isDifferent = true
-          }
-        } else if (field.getName == "topics_subtopics") {
-          if (makeTopicsString(article.topics) != data) {
-            isDifferent = true
-          }
-        }
-      }
-    }
-    isDifferent
   }
 
   def getArticle(id: Long): Article = {
