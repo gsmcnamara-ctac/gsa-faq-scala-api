@@ -65,6 +65,8 @@ class ArticlesCmsServices extends PercussionContentServices with LogHelper {
       var updated = false
       if (isDifferent(fields, article)) {
         updated = services.updateItem(item, mapArticleToFields(article), guidFactory.getNewRevisionGUID(id.toLong))
+      } else {
+        updated = true
       }
       updated
     } catch {

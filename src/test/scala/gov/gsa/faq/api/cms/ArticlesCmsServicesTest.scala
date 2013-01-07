@@ -103,7 +103,7 @@ class ArticlesCmsServicesTest extends FeatureSpec with BeforeAndAfter {
 
       when(percussionServices.loadItem(2l)).thenReturn(item)
 
-      services.updateArticle(article, "2")
+      assert(services.updateArticle(article, "2"))
 
       verify(percussionServices).login()
       verify(servicesConnector).configureServices(services, Constants.DATA_DIR, Constants.SERVICES_PROPS_NAME)
