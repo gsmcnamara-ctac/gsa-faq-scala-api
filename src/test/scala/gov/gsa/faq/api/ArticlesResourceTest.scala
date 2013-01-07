@@ -82,9 +82,26 @@ class ArticlesResourceTest extends FeatureSpec with BeforeAndAfter {
     }
   }
 
+  feature("getSelectedCmsArticles") {
+
+    scenario("get 2 artciles from the cms, one exists and one does not") {
+      when(cmsIdMapper.get("123")).thenReturn(null)
+      when(cmsIdMapper.get("456")).thenReturn("654")
+
+      val article = new Article()
+      article.id = "wow"
+      when(cmsServices.getArticle(654l)).thenReturn(article)
+
+      val response = articlesResource.getSelectedCmsArticles("123|456")
+      val articles = response.getEntity().asInstanceOf[Articles].article
+      assert(1 === articles.size)
+      assert("wow" === articles(0).id)
+    }
+  }
+
   feature("updateSelectedCmsArticles") {
 
-    scenario("get two articles from the dao where one exists and one does not exist in the cms id map file") {
+    scenario("get 2 articles from the dao where one exists and one does not exist in the cms id map file") {
 
       val dao = mock(classOf[FaqDao])
 
@@ -108,9 +125,11 @@ class ArticlesResourceTest extends FeatureSpec with BeforeAndAfter {
       assert("123" === results(0).id)
       assert("insert" === results(0).operation)
       assert("success" === results(0).result)
+      assert("321" === results(0).cmsId)
       assert("456" === results(1).id)
       assert("update" === results(1).operation)
       assert("success" === results(1).result)
+      assert("999" === results(1).cmsId)
 
       verify(cmsIdMapper).put("123", "321")
       verify(cmsIdMapper).put("456", "999")

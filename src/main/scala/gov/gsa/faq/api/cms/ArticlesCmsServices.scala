@@ -98,21 +98,24 @@ class ArticlesCmsServices extends PercussionContentServices with LogHelper {
         val fields = psItem.getFields
         val article: Article = new Article()
         for (field <- fields) {
-          val data: String = field.getPSFieldValue(0).getRawData
-          if (field.getName == "id") {
-            article.id = data
-          } else if (field.getName == "link") {
-            article.link = data
-          } else if (field.getName == "body") {
-            article.body = "<![CDATA[" + data + "]]"
-          } else if (field.getName == "rank") {
-            article.rank = data
-          } else if (field.getName == "updated") {
-            article.updated = data
-          } else if (field.getName == "article_title") {
-            article.title = data
-          } else if (field.getName == "topics_subtopics") {
-            article.topics = new TopicsConverter().convertField(field)
+          val value = field.getPSFieldValue
+          if (value != null && value.length > 0) {
+            val data: String = value(0).getRawData
+            if (field.getName == "id") {
+              article.id = data
+            } else if (field.getName == "link") {
+              article.link = data
+            } else if (field.getName == "body") {
+              article.body = "<![CDATA[" + data + "]]"
+            } else if (field.getName == "rank") {
+              article.rank = data
+            } else if (field.getName == "updated") {
+              article.updated = data
+            } else if (field.getName == "article_title") {
+              article.title = data
+            } else if (field.getName == "topics_subtopics") {
+              article.topics = new TopicsConverter().convertField(field)
+            }
           }
         }
         article
@@ -165,21 +168,24 @@ class ArticlesCmsServices extends PercussionContentServices with LogHelper {
             val fields = psItem.getFields
             val article: Article = new Article()
             for (field <- fields) {
-              val data: String = field.getPSFieldValue(0).getRawData
-              if (field.getName == "id") {
-                article.id = data
-              } else if (field.getName == "link") {
-                article.link = data
-              } else if (field.getName == "body") {
-                article.body = data
-              } else if (field.getName == "rank") {
-                article.rank = data
-              } else if (field.getName == "updated") {
-                article.updated = data
-              } else if (field.getName == "article_title") {
-                article.title = data
-              } else if (field.getName == "topics_subtopics") {
-                article.topics = new TopicsConverter().convertField(field)
+              val value = field.getPSFieldValue
+              if (value != null) {
+                val data: String = value(0).getRawData
+                if (field.getName == "id") {
+                  article.id = data
+                } else if (field.getName == "link") {
+                  article.link = data
+                } else if (field.getName == "body") {
+                  article.body = data
+                } else if (field.getName == "rank") {
+                  article.rank = data
+                } else if (field.getName == "updated") {
+                  article.updated = data
+                } else if (field.getName == "article_title") {
+                  article.title = data
+                } else if (field.getName == "topics_subtopics") {
+                  article.topics = new TopicsConverter().convertField(field)
+                }
               }
             }
             articles += article

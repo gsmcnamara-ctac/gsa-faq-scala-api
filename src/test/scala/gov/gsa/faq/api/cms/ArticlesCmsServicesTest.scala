@@ -15,6 +15,7 @@ import gov.gsa.faq.api.model.Subtopics
 import gov.gsa.faq.api.model.Topic
 import gov.gsa.faq.api.model.Topics
 import gov.gsa.faq.api.model.Article
+import org.scalatest.matchers.ShouldMatchers._
 
 @RunWith(classOf[JUnitRunner])
 class ArticlesCmsServicesTest extends FeatureSpec with BeforeAndAfter {
@@ -231,7 +232,7 @@ class ArticlesCmsServicesTest extends FeatureSpec with BeforeAndAfter {
 
   feature("getArticle") {
 
-    scenario("load 1 item from the CMS and return a single Articles") {
+    scenario("load 1 item from the CMS and return a single Article") {
 
       val item = makeItem
       when(percussionServices.loadItem(2l)).thenReturn(item)
@@ -244,6 +245,57 @@ class ArticlesCmsServicesTest extends FeatureSpec with BeforeAndAfter {
       assert(article.title === "title")
       assert(article.updated === "updated")
       assert(article.topics === new TopicsConverter().convertField(makeTopicsField))
+
+      verify(percussionServices).login()
+      verify(servicesConnector).configureServices(services, Constants.DATA_DIR, Constants.SERVICES_PROPS_NAME)
+      verify(percussionServices).logout()
+    }
+
+    scenario("load 1 item from the CMS and return a single Article with no topics") {
+
+      val idField = new PSField()
+      idField.setName("id")
+      val idValue = new PSFieldValue()
+      idValue.setRawData("id")
+      idField.setPSFieldValue(Array[PSFieldValue](idValue))
+
+      val item: PSItem = mock(classOf[PSItem])
+      when(item.getFields).thenReturn(Array[PSField](idField))
+      when(item.getId).thenReturn(2l)
+
+      when(percussionServices.loadItem(2l)).thenReturn(item)
+
+      val article = services.getArticle(2l)
+      assert(article.id === "id")
+      article.topics should be(null)
+
+      verify(percussionServices).login()
+      verify(servicesConnector).configureServices(services, Constants.DATA_DIR, Constants.SERVICES_PROPS_NAME)
+      verify(percussionServices).logout()
+    }
+
+    scenario("load 1 item from the CMS with a null field value") {
+
+      val idField = new PSField()
+      idField.setName("id")
+      val idValue = new PSFieldValue()
+      idValue.setRawData("id")
+      idField.setPSFieldValue(Array[PSFieldValue](idValue))
+
+      val linkField = new PSField()
+      linkField.setName("link")
+      val linkValue = new PSFieldValue()
+      linkValue.setRawData("link")
+
+      val item: PSItem = mock(classOf[PSItem])
+      when(item.getFields).thenReturn(Array[PSField](idField))
+      when(item.getId).thenReturn(2l)
+
+      when(percussionServices.loadItem(2l)).thenReturn(item)
+
+      val article = services.getArticle(2l)
+      assert(article.id === "id")
+      article.topics should be(null)
 
       verify(percussionServices).login()
       verify(servicesConnector).configureServices(services, Constants.DATA_DIR, Constants.SERVICES_PROPS_NAME)

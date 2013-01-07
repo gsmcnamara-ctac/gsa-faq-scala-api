@@ -55,6 +55,26 @@ trait ArticlesResource extends RestResourceUtil with RestAPI with LogHelper {
 
   @GET
   @ApiOperation(value = "Insert new articles or update existing article by id", notes = "")
+  @Path("/articles/cms/get")
+  def getSelectedCmsArticles(@ApiParam(value = "Article ids. Ex. \"1234|4567\"", required = true) @QueryParam("article_ids") articleIds: String): Response = {
+    val articleList = new ListBuffer[Article]()
+    val ids = if (articleIds != null && articleIds.length > 0) articleIds.split("[|]") else null
+    if (ids != null && ids.length > 0) {
+      for (articleId <- ids) {
+        val cmsId = cmsIdMapper.get(articleId)
+        if (cmsId != null) {
+          val article = cmsServices.getArticle(cmsId.toLong)
+          if (article != null) {
+            articleList += article
+          }
+        }
+      }
+    }
+    Response.ok().entity(new Articles(articleList)).build()
+  }
+
+  @GET
+  @ApiOperation(value = "Insert new articles or update existing article by id", notes = "")
   @Path("/articles/cms/update")
   def updateSelectedCmsArticles(@ApiParam(value = "Article ids. Ex. \"1234|4567\"", required = true) @QueryParam("article_ids") articleIds: String): Response = {
 
@@ -79,6 +99,7 @@ trait ArticlesResource extends RestResourceUtil with RestAPI with LogHelper {
             result.operation = "insert"
             val _cmsId = cmsServices.createArticle(article)
             result.result = if (_cmsId == null) "failure" else "success"
+            result.cmsId = _cmsId
             cmsIdMapper.put(article.id, _cmsId)
           } else {
             result.operation = "update"
@@ -88,6 +109,7 @@ trait ArticlesResource extends RestResourceUtil with RestAPI with LogHelper {
               logger.error("update of article with id=" + article.id + " failed")
             } else {
               cmsIdMapper.put(article.id, id)
+              result.cmsId = id
             }
           }
           results += result
