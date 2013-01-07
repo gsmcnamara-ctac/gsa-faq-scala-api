@@ -66,7 +66,7 @@ class ArticlesCmsServicesTest extends FeatureSpec with BeforeAndAfter {
       assert("1234" === services.createArticle(article))
 
       verify(percussionServices).login()
-      verify(servicesConnector).configureServices(services, Constants.SERVICES_PROPS, Constants.SERVICES_PROPS_NAME)
+      verify(servicesConnector).configureServices(services, Constants.DATA_DIR, Constants.SERVICES_PROPS_NAME)
       verify(percussionServices).logout()
     }
   }
@@ -80,7 +80,7 @@ class ArticlesCmsServicesTest extends FeatureSpec with BeforeAndAfter {
       val connector: ServicesConnector = new ServicesConnector()
       services.servicesConnector = connector
       services.configureServices
-      assert(Array("//Sites/EnterpriseInvestments/faqArticle")===connector.getTargetFolders)
+      assert(Array("//Sites/EnterpriseInvestments/faqArticle") === connector.getTargetFolders)
     }
 
     scenario("properties file exists") {
@@ -89,7 +89,7 @@ class ArticlesCmsServicesTest extends FeatureSpec with BeforeAndAfter {
       val connector: ServicesConnector = new ServicesConnector()
       services.servicesConnector = connector
       services.configureServices
-      assert(Array("//Sites/EnterpriseInvestments/faqArticle")===connector.getTargetFolders)
+      assert(Array("//Sites/EnterpriseInvestments/faqArticle") === connector.getTargetFolders)
     }
   }
 
@@ -105,7 +105,7 @@ class ArticlesCmsServicesTest extends FeatureSpec with BeforeAndAfter {
       services.updateArticle(article, "2")
 
       verify(percussionServices).login()
-      verify(servicesConnector).configureServices(services, Constants.SERVICES_PROPS, Constants.SERVICES_PROPS_NAME)
+      verify(servicesConnector).configureServices(services, Constants.DATA_DIR, Constants.SERVICES_PROPS_NAME)
       verify(percussionServices).logout()
     }
 
@@ -124,7 +124,7 @@ class ArticlesCmsServicesTest extends FeatureSpec with BeforeAndAfter {
       assert(services.updateArticle(article, "2"))
 
       verify(percussionServices).login()
-      verify(servicesConnector).configureServices(services, Constants.SERVICES_PROPS, Constants.SERVICES_PROPS_NAME)
+      verify(servicesConnector).configureServices(services, Constants.DATA_DIR, Constants.SERVICES_PROPS_NAME)
       verify(percussionServices).logout()
     }
 
@@ -143,7 +143,7 @@ class ArticlesCmsServicesTest extends FeatureSpec with BeforeAndAfter {
       assert(services.updateArticle(article, "2"))
 
       verify(percussionServices).login()
-      verify(servicesConnector).configureServices(services, Constants.SERVICES_PROPS, Constants.SERVICES_PROPS_NAME)
+      verify(servicesConnector).configureServices(services, Constants.DATA_DIR, Constants.SERVICES_PROPS_NAME)
       verify(percussionServices).logout()
     }
 
@@ -162,7 +162,7 @@ class ArticlesCmsServicesTest extends FeatureSpec with BeforeAndAfter {
       assert(services.updateArticle(article, "2"))
 
       verify(percussionServices).login()
-      verify(servicesConnector).configureServices(services, Constants.SERVICES_PROPS, Constants.SERVICES_PROPS_NAME)
+      verify(servicesConnector).configureServices(services, Constants.DATA_DIR, Constants.SERVICES_PROPS_NAME)
       verify(percussionServices).logout()
     }
 
@@ -181,7 +181,7 @@ class ArticlesCmsServicesTest extends FeatureSpec with BeforeAndAfter {
       assert(services.updateArticle(article, "2"))
 
       verify(percussionServices).login()
-      verify(servicesConnector).configureServices(services, Constants.SERVICES_PROPS, Constants.SERVICES_PROPS_NAME)
+      verify(servicesConnector).configureServices(services, Constants.DATA_DIR, Constants.SERVICES_PROPS_NAME)
       verify(percussionServices).logout()
     }
 
@@ -200,11 +200,11 @@ class ArticlesCmsServicesTest extends FeatureSpec with BeforeAndAfter {
       assert(services.updateArticle(article, "2"))
 
       verify(percussionServices).login()
-      verify(servicesConnector).configureServices(services, Constants.SERVICES_PROPS, Constants.SERVICES_PROPS_NAME)
+      verify(servicesConnector).configureServices(services, Constants.DATA_DIR, Constants.SERVICES_PROPS_NAME)
       verify(percussionServices).logout()
     }
 
-    def makeFields() : Map[String, Object] = {
+    def makeFields(): Map[String, Object] = {
       var fields = Map[String, Object]()
       fields += ("id" -> "id")
       fields += ("link" -> "link")
@@ -226,7 +226,7 @@ class ArticlesCmsServicesTest extends FeatureSpec with BeforeAndAfter {
     topicsField
   }
 
-  def makeItem() : PSItem = {
+  def makeItem(): PSItem = {
 
     val idField = new PSField()
     idField.setName("id")
@@ -271,7 +271,7 @@ class ArticlesCmsServicesTest extends FeatureSpec with BeforeAndAfter {
     item
   }
 
-  def makeArticle : Article = {
+  def makeArticle: Article = {
     val article = new Article()
     article.body = "<![CDATA[body]]"
     article.id = "id"
@@ -300,7 +300,7 @@ class ArticlesCmsServicesTest extends FeatureSpec with BeforeAndAfter {
       assert(article.topics === new TopicsConverter().convertField(makeTopicsField))
 
       verify(percussionServices).login()
-      verify(servicesConnector).configureServices(services, Constants.SERVICES_PROPS, Constants.SERVICES_PROPS_NAME)
+      verify(servicesConnector).configureServices(services, Constants.DATA_DIR, Constants.SERVICES_PROPS_NAME)
       verify(percussionServices).logout()
     }
   }
@@ -389,7 +389,7 @@ class ArticlesCmsServicesTest extends FeatureSpec with BeforeAndAfter {
       assert("subtopic4" === topics.topic.get(1).subtopics.subtopic.get(1))
 
       verify(percussionServices).login()
-      verify(servicesConnector).configureServices(services, Constants.SERVICES_PROPS, Constants.SERVICES_PROPS_NAME)
+      verify(servicesConnector).configureServices(services, Constants.DATA_DIR, Constants.SERVICES_PROPS_NAME)
       verify(percussionServices).logout()
     }
   }

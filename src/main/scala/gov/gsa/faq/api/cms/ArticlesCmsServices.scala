@@ -1,20 +1,19 @@
 package gov.gsa.faq.api.cms
 
-import com.ctacorp.rhythmyx.soap.{Guid, ServicesConnector, PercussionContentServices}
+import com.ctacorp.rhythmyx.soap.{ServicesConnector, PercussionContentServices}
 import gov.gsa.faq.api.model.{Topics, Article}
 import com.percussion.webservices.content.{PSField, PSItem, PSItemSummary}
 import gov.gsa.faq.api.{Constants, LogHelper}
 import collection.mutable.ListBuffer
 import scala.collection.JavaConversions._
 import java.io.File
-import io.Source
-import org.apache.commons.io.{IOUtils, FileUtils}
+import org.apache.commons.io.FileUtils
 import org.springframework.core.io.ClassPathResource
 
 class ArticlesCmsServices extends PercussionContentServices with LogHelper {
 
   var services: PercussionContentServices = this
-  var servicesConnector: ServicesConnector = _
+  var servicesConnector: ServicesConnector = new ServicesConnector()
   var guidFactory = new GuidFactory()
 
   def createArticle(article: Article): String = {
@@ -31,7 +30,7 @@ class ArticlesCmsServices extends PercussionContentServices with LogHelper {
   }
 
 
-  def mapArticleToFields(article: Article) : Map[String, Object] = {
+  def mapArticleToFields(article: Article): Map[String, Object] = {
     var fields = Map[String, Object]()
     fields += ("id" -> article.id)
     fields += ("link" -> article.link)
@@ -47,12 +46,12 @@ class ArticlesCmsServices extends PercussionContentServices with LogHelper {
     val file: File = new File(Constants.SERVICES_PROPS)
     if (!file.exists()) {
       val is = new ClassPathResource("services.properties").getInputStream
-      FileUtils.copyInputStreamToFile(is,file)
+      FileUtils.copyInputStreamToFile(is, file)
     }
-    servicesConnector.configureServices(this, Constants.SERVICES_PROPS, Constants.SERVICES_PROPS_NAME)
+    servicesConnector.configureServices(this, Constants.DATA_DIR, Constants.SERVICES_PROPS_NAME)
   }
 
-  def updateArticle(article: Article, id: String) : Boolean = {
+  def updateArticle(article: Article, id: String): Boolean = {
 
     configureServices
 
@@ -60,7 +59,7 @@ class ArticlesCmsServices extends PercussionContentServices with LogHelper {
 
       services.login()
 
-      val item : PSItem = services.loadItem(id.toLong)
+      val item: PSItem = services.loadItem(id.toLong)
       val fields = item.getFields
 
       var updated = false
@@ -115,13 +114,13 @@ class ArticlesCmsServices extends PercussionContentServices with LogHelper {
     isDifferent
   }
 
-  def getArticle(id:Long): Article = {
+  def getArticle(id: Long): Article = {
     configureServices
 
     try {
       services.login()
       val psItem = services.loadItem(id)
-      if (psItem!=null) {
+      if (psItem != null) {
         val fields = psItem.getFields
         val article: Article = new Article()
         for (field <- fields) {
@@ -131,7 +130,7 @@ class ArticlesCmsServices extends PercussionContentServices with LogHelper {
           } else if (field.getName == "link") {
             article.link = data
           } else if (field.getName == "body") {
-            article.body = "<![CDATA["+data+"]]"
+            article.body = "<![CDATA[" + data + "]]"
           } else if (field.getName == "rank") {
             article.rank = data
           } else if (field.getName == "updated") {
