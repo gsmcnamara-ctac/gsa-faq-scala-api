@@ -1,5 +1,6 @@
 package gov.gsa.faq.api
 
+import cms.{CmsIdMapper, ArticlesCmsServices}
 import com.wordnik.swagger.core.util.RestResourceUtil
 import dao.{FaqDatabase, FaqDao}
 import gov.gsa.rest.api.{RangeFinder, RestAPI}
@@ -21,6 +22,8 @@ trait ArticlesResource extends RestResourceUtil with RestAPI with LogHelper {
   @Context var uriInfo :UriInfo = _
   @Context var request :HttpServletRequest = _
   var rangeFinder : RangeFinder = new RangeFinder()
+  var cmsServices : ArticlesCmsServices = new ArticlesCmsServices()
+  var cmsIdMapper : CmsIdMapper = new CmsIdMapper()
 
   @GET
   @ApiOperation(value = "Get all Aritcles", notes = "")
@@ -48,6 +51,18 @@ trait ArticlesResource extends RestResourceUtil with RestAPI with LogHelper {
 
     } catch {
       case e: Exception => throw new ApiException(e)
+    }
+  }
+
+  @GET
+  @ApiOperation(value = "Force an update of CMS articles", notes = "")
+  @Path("/articles/cms/update")
+  def updateArticles() {
+
+    val faqDao = new FaqDao(InMemoryHSQLDatabase.getInstance(new FaqDatabase()).getDataSource())
+    val articles = faqDao.getArticles(null, null, null)
+    for (article <- articles) {
+      var cmsId = cmsIdMapper.get(article.id)
     }
   }
 }

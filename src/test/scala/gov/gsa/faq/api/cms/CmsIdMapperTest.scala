@@ -7,6 +7,7 @@ import java.io.File
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.{BeforeAndAfter, FeatureSpec}
 import org.junit.runner.RunWith
+import org.scalatest.matchers.ShouldMatchers._
 
 @RunWith(classOf[JUnitRunner])
 class CmsIdMapperTest extends FeatureSpec with BeforeAndAfter {
@@ -18,20 +19,35 @@ class CmsIdMapperTest extends FeatureSpec with BeforeAndAfter {
     FileUtils.writeStringToFile(new File(Constants.CMS_ID_MAP),"3=4"+"\n",true)
   }
 
-  feature("addOrGetId") {
+  feature("get") {
 
     scenario("id doesn't exist") {
-      assert("6"===mapper.addOrGetId("5","6"))
-      val conf = ConfigFactory.parseFile(new File(Constants.CMS_ID_MAP))
-      assert("6"===conf.getString("5"))
+      mapper.get("5") should be (null)
     }
 
     scenario("id exists") {
-      assert("4"===mapper.addOrGetId("3","4"))
+      FileUtils.writeStringToFile(new File(Constants.CMS_ID_MAP),"5=6"+"\n")
+      assert("6"===mapper.get("5"))
+    }
+  }
+
+  feature("set") {
+
+    scenario("id does not exists") {
+      mapper.add("5","6")
       val conf = ConfigFactory.parseFile(new File(Constants.CMS_ID_MAP))
-      assert("4"===conf.getString("3"))
+      assert("6"===conf.getString("5"))
       val fileString = FileUtils.readFileToString(new File(Constants.CMS_ID_MAP))
-      assert("1=2\n3=4\n"===fileString)
+      assert("1=2\n3=4\n5=6\n"===fileString)
+    }
+
+    scenario("id already exists") {
+      FileUtils.writeStringToFile(new File(Constants.CMS_ID_MAP),"5=6"+"\n",true)
+      mapper.add("5","6")
+      val conf = ConfigFactory.parseFile(new File(Constants.CMS_ID_MAP))
+      assert("6"===conf.getString("5"))
+      val fileString = FileUtils.readFileToString(new File(Constants.CMS_ID_MAP))
+      assert("1=2\n3=4\n5=6\n"===fileString)
     }
   }
 }
