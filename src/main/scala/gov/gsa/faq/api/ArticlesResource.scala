@@ -9,7 +9,7 @@ import javax.ws.rs.core.{UriInfo, Context, Response, MediaType}
 import com.wordnik.swagger.annotations.{Api, ApiParam, ApiOperation}
 import gov.gsa.rest.api.dao.InMemoryHSQLDatabase
 import collection.mutable.ListBuffer
-import model.{Result, Articles, Article}
+import model.{Results,Result, Articles, Article}
 import gov.gsa.rest.api.exception.ApiException
 import scala.Array
 import com.wordnik.swagger.jaxrs.Help
@@ -89,7 +89,7 @@ trait ArticlesResource extends RestResourceUtil with RestAPI with LogHelper {
         results += result
       }
     }
-    Response.ok().entity(results.toList).build()
+    Response.ok().entity(new Results(results)).build()
   }
 }
 

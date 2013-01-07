@@ -2,7 +2,7 @@ package gov.gsa.faq.api
 
 import cms.{CmsIdMapper, ArticlesCmsServices}
 import dao.FaqDao
-import model.{Articles, Article}
+import model.{Results, Articles, Article, Result}
 import org.scalatest.{FeatureSpec, BeforeAndAfter}
 import gov.gsa.rest.api.{RangeFinder}
 import javax.servlet.http.HttpServletRequest
@@ -17,7 +17,6 @@ import scala.collection.JavaConversions._
 import org.scalatest.matchers.ShouldMatchers._
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
-import gov.gsa.faq.api.model.Result
 
 @RunWith(classOf[JUnitRunner])
 class ArticlesResourceTest extends FeatureSpec with BeforeAndAfter {
@@ -103,7 +102,7 @@ class ArticlesResourceTest extends FeatureSpec with BeforeAndAfter {
       when(cmsServices.updateArticle(article2,"654")).thenReturn(false)
 
       val response = articlesResource.updateCmsArticles(dao,"123|456")
-      val results : List[Result] = response.getEntity.asInstanceOf[List[Result]]
+      val results : java.util.List[Result] = response.getEntity.asInstanceOf[Results].result
       assert(2===results.size)
       assert("123"===results(0).id)
       assert("insert"===results(0).operation)
@@ -117,9 +116,9 @@ class ArticlesResourceTest extends FeatureSpec with BeforeAndAfter {
 
     scenario("article ids string is empty or null") {
       var response = articlesResource.updateCmsArticles(null,null)
-      assert(List[Result]()===response.getEntity)
+      assert(0===response.getEntity.asInstanceOf[Results].result.size())
       response = articlesResource.updateCmsArticles(null,"")
-      assert(List[Result]()===response.getEntity)
+      assert(0===response.getEntity.asInstanceOf[Results].result.size())
     }
   }
 }
