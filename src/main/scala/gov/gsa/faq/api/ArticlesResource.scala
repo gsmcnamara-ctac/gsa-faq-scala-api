@@ -65,7 +65,7 @@ trait ArticlesResource extends RestResourceUtil with RestAPI with LogHelper {
   def updateCmsArticles(faqDao: FaqDao, articleIds:String) : Response = {
 
     val results = new ListBuffer[Result]()
-    val ids = articleIds.split("[|]")
+    val ids = if(articleIds!=null && articleIds.length>0) articleIds.split("[|]") else null
 
     if (ids!=null && ids.length>0) {
       for (articleId <- ids) {
