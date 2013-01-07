@@ -96,12 +96,13 @@ class ArticlesCmsServicesTest extends FeatureSpec with BeforeAndAfter {
 
   feature("updateArticle") {
 
-    scenario("no changes in item") {
+    scenario("update success") {
 
       val item = makeItem()
       val article = makeArticle
 
       when(percussionServices.loadItem(2l)).thenReturn(item)
+      when(percussionServices.updateItem(item, makeFields, guidFactory.getNewRevisionGUID(2l))).thenReturn(true)
 
       assert(services.updateArticle(article, "2"))
 
@@ -110,95 +111,15 @@ class ArticlesCmsServicesTest extends FeatureSpec with BeforeAndAfter {
       verify(percussionServices).logout()
     }
 
-    scenario("article link is different") {
+    scenario("update failure") {
 
-      val item = makeItem
+      val item = makeItem()
       val article = makeArticle
-      article.link = "ham"
-      var fields = makeFields
-      fields += ("link" -> "ham")
 
       when(percussionServices.loadItem(2l)).thenReturn(item)
-      when(guidFactory.getNewRevisionGUID(2l)).thenReturn(2l)
-      when(percussionServices.updateItem(item, fields, "2".toLong)).thenReturn(true)
+      when(percussionServices.updateItem(item, makeFields, guidFactory.getNewRevisionGUID(2l))).thenThrow(new Exception("meh"))
 
-      assert(services.updateArticle(article, "2"))
-
-      verify(percussionServices).login()
-      verify(servicesConnector).configureServices(services, Constants.DATA_DIR, Constants.SERVICES_PROPS_NAME)
-      verify(percussionServices).logout()
-    }
-
-    scenario("article title is different") {
-
-      val item = makeItem
-      val article = makeArticle
-      article.title = "ham"
-      var fields = makeFields
-      fields += ("article_title" -> "ham")
-
-      when(percussionServices.loadItem(2l)).thenReturn(item)
-      when(guidFactory.getNewRevisionGUID(2l)).thenReturn(2l)
-      when(percussionServices.updateItem(item, fields, "2".toLong)).thenReturn(true)
-
-      assert(services.updateArticle(article, "2"))
-
-      verify(percussionServices).login()
-      verify(servicesConnector).configureServices(services, Constants.DATA_DIR, Constants.SERVICES_PROPS_NAME)
-      verify(percussionServices).logout()
-    }
-
-    scenario("article rank is different") {
-
-      val item = makeItem
-      val article = makeArticle
-      article.rank = "ham"
-      var fields = makeFields
-      fields += ("rank" -> "ham")
-
-      when(percussionServices.loadItem(2l)).thenReturn(item)
-      when(guidFactory.getNewRevisionGUID(2l)).thenReturn(2l)
-      when(percussionServices.updateItem(item, fields, "2".toLong)).thenReturn(true)
-
-      assert(services.updateArticle(article, "2"))
-
-      verify(percussionServices).login()
-      verify(servicesConnector).configureServices(services, Constants.DATA_DIR, Constants.SERVICES_PROPS_NAME)
-      verify(percussionServices).logout()
-    }
-
-    scenario("article updated is different") {
-
-      val item = makeItem
-      val article = makeArticle
-      article.updated = "ham"
-      var fields = makeFields
-      fields += ("updated" -> "ham")
-
-      when(percussionServices.loadItem(2l)).thenReturn(item)
-      when(guidFactory.getNewRevisionGUID(2l)).thenReturn(2l)
-      when(percussionServices.updateItem(item, fields, "2".toLong)).thenReturn(true)
-
-      assert(services.updateArticle(article, "2"))
-
-      verify(percussionServices).login()
-      verify(servicesConnector).configureServices(services, Constants.DATA_DIR, Constants.SERVICES_PROPS_NAME)
-      verify(percussionServices).logout()
-    }
-
-    scenario("article topics is different") {
-
-      val item = makeItem
-      val article = makeArticle
-      article.topics = new Topics()
-      var fields = makeFields
-      fields += ("topics_subtopics" -> "")
-
-      when(percussionServices.loadItem(2l)).thenReturn(item)
-      when(guidFactory.getNewRevisionGUID(2l)).thenReturn(2l)
-      when(percussionServices.updateItem(item, fields, "2".toLong)).thenReturn(true)
-
-      assert(services.updateArticle(article, "2"))
+      assert(!services.updateArticle(article, "2"))
 
       verify(percussionServices).login()
       verify(servicesConnector).configureServices(services, Constants.DATA_DIR, Constants.SERVICES_PROPS_NAME)
