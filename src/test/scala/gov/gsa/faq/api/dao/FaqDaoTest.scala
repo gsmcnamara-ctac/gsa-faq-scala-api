@@ -32,6 +32,33 @@ class FaqDaoTest extends FeatureSpec with BeforeAndAfter {
     faqDao = new FaqDao(dataSource)
   }
 
+  feature("getArticle") {
+
+    scenario("article exists") {
+      val article = faqDao.getArticle("9666")
+
+      article should not be (null)
+      assert("http://answers.usa.gov/system/web/view/selfservice/templates/USAgov/egredirect.jsp?p_faq_id=9666" === article.link)
+      assert(article.title.matches("Fish and Wildlife Service:.*Student Employment Programs"))
+      assert("<![CDATA["+Source.fromInputStream(getClass().getResourceAsStream("/9666.body")).getLines().mkString("\n")+"]]" === article.body)
+      assert(50.43334 === article.rank.toDouble)
+      assert("Nov 26 2012 04:58:24:000PM" === article.updated)
+
+      val topics = article.topics.topic
+      assert(2 === topics.size)
+      assert("Jobs and Education" === topics(0).name)
+      assert("Fish and Wildlife Service (FWS)" === topics(1).name)
+
+      assert("Education" === topics(0).subtopics.subtopic(0))
+      assert("Jobs" === topics(0).subtopics.subtopic(1))
+    }
+
+    scenario("article doesn't exists") {
+      val article = faqDao.getArticle("asdf")
+      article should be (null)
+    }
+  }
+
   feature("getArticles") {
 
     scenario("all null params (return all articles all data)") {

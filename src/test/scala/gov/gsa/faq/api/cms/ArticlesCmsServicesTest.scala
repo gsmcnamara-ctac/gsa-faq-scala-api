@@ -80,7 +80,7 @@ class ArticlesCmsServicesTest extends FeatureSpec with BeforeAndAfter {
       val connector: ServicesConnector = new ServicesConnector()
       services.servicesConnector = connector
       services.configureServices
-      assert(Array("//Sites/EnterpriseInvestments/FaqArticles")===connector.getTargetFolders)
+      assert(Array("//Sites/EnterpriseInvestments/faqArticle")===connector.getTargetFolders)
     }
 
     scenario("properties file exists") {
@@ -89,7 +89,7 @@ class ArticlesCmsServicesTest extends FeatureSpec with BeforeAndAfter {
       val connector: ServicesConnector = new ServicesConnector()
       services.servicesConnector = connector
       services.configureServices
-      assert(Array("//Sites/EnterpriseInvestments/FaqArticles")===connector.getTargetFolders)
+      assert(Array("//Sites/EnterpriseInvestments/faqArticle")===connector.getTargetFolders)
     }
   }
 

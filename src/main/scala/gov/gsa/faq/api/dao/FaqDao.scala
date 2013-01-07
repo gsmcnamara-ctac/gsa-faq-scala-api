@@ -22,6 +22,16 @@ class FaqDao(val dataSource: DataSource) extends LogHelper {
   var jdbcTemplate : JdbcTemplate = new JdbcTemplate(dataSource)
   val sqlHelper : SQLHelper = new SQLHelper()
 
+  def getArticle(id:String) : Article = {
+
+    val rowSet = jdbcTemplate.queryForRowSet("select * from articles where id=?",id)
+    if (rowSet.next()) {
+      mapRowToArticle(jdbcTemplate, rowSet, allowedResultFilters)
+    } else {
+      null
+    }
+  }
+
   def getArticles(queryParamString:String,resultFilterString:String,sortString:String) : Seq[Article] = {
 
     val queries = argumentsParser.getQueryList(queryParamString, queryParameter)
@@ -92,7 +102,7 @@ class FaqDao(val dataSource: DataSource) extends LogHelper {
         articles += mapRowToArticle(jdbcTemplate, articlesRowSet, validResultFilters)
       }
 
-      articles
+      articles.toList
     }
   }
 

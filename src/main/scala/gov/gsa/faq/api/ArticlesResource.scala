@@ -9,13 +9,12 @@ import javax.ws.rs.core.{UriInfo, Context, Response, MediaType}
 import com.wordnik.swagger.annotations.{Api, ApiParam, ApiOperation}
 import gov.gsa.rest.api.dao.InMemoryHSQLDatabase
 import collection.mutable.ListBuffer
-import model.{Articles, Article}
+import model.{Result, Articles, Article}
 import gov.gsa.rest.api.exception.ApiException
 import scala.Array
 import com.wordnik.swagger.jaxrs.Help
 import javax.ws.rs._
 import scala.collection.JavaConversions._
-
 
 trait ArticlesResource extends RestResourceUtil with RestAPI with LogHelper {
 
@@ -55,15 +54,42 @@ trait ArticlesResource extends RestResourceUtil with RestAPI with LogHelper {
   }
 
   @GET
-  @ApiOperation(value = "Force an update of CMS articles", notes = "")
+  @ApiOperation(value = "Insert new articles or update existing article by id", notes = "")
   @Path("/articles/cms/update")
-  def updateArticles() {
+  def updateSelectedCmsArticles(@ApiParam(value = "Article ids. Ex. \"1234|4567\"", required = true) @QueryParam("article_ids") articleIds:String) :Response = {
 
     val faqDao = new FaqDao(InMemoryHSQLDatabase.getInstance(new FaqDatabase()).getDataSource())
-    val articles = faqDao.getArticles(null, null, null)
-    for (article <- articles) {
-      var cmsId = cmsIdMapper.get(article.id)
+    updateCmsArticles(faqDao,articleIds)
+  }
+
+  def updateCmsArticles(faqDao: FaqDao, articleIds:String) : Response = {
+
+    val results = new ListBuffer[Result]()
+    val ids = articleIds.split("[|]")
+
+    if (ids!=null && ids.length>0) {
+      for (articleId <- ids) {
+        val result = new Result()
+        result.id = articleId
+        val article = faqDao.getArticle(articleId)
+        val cmsId = cmsIdMapper.get(article.id)
+        if (cmsId==null) {
+          result.operation = "insert"
+          val _cmsId = cmsServices.createArticle(article)
+          result.result = if (_cmsId==null) "failure" else "success"
+          cmsIdMapper.add(article.id,_cmsId)
+        } else {
+          result.operation = "update"
+          val success = cmsServices.updateArticle(article, cmsId)
+          result.result = if (success) "success" else "failure"
+          if(!success) {
+            logger.error("update of article with id="+article.id+" failed")
+          }
+        }
+        results += result
+      }
     }
+    Response.ok().entity(results.toList).build()
   }
 }
 
