@@ -8,22 +8,24 @@ import org.apache.commons.io.FileUtils
 
 class CmsIdMapper extends LogHelper {
 
-  def add(id:String,cmsId:String) {
+  var location = new File(Constants.CMS_ID_MAP)
+
+  def add(id: String, cmsId: String) {
     val _cmsId = get(id)
-    if (_cmsId==null) {
-      FileUtils.writeStringToFile(new File(Constants.CMS_ID_MAP),id+"="+cmsId+"\n",true)
+    if (_cmsId == null) {
+      FileUtils.writeStringToFile(location, id + "=" + cmsId + "\n", true)
     }
   }
 
-  def get(id:String) : String = {
+  def get(id: String): String = {
 
-    val conf = ConfigFactory.parseFile(new File(Constants.CMS_ID_MAP))
+    val conf = ConfigFactory.parseFile(location)
     val value = {
-       try {
-         conf.getString(id)
-       } catch {
-         case e: ConfigException.Missing => (null)
-       }
+      try {
+        conf.getString(id)
+      } catch {
+        case e: ConfigException.Missing => (null)
+      }
     }
     value
   }

@@ -86,30 +86,33 @@ class ArticlesCmsServices extends PercussionContentServices with LogHelper {
   def isDifferent(fields: Array[PSField], article: Article): Boolean = {
     var isDifferent = false
     for (field <- fields) {
-      val data: String = field.getPSFieldValue(0).getRawData
-      if (field.getName == "link") {
-        if (article.link != data) {
-          isDifferent = true
-        }
-      } else if (field.getName == "body") {
-        if (article.body != "<![CDATA[" + data + "]]") {
-          isDifferent = true
-        }
-      } else if (field.getName == "rank") {
-        if (article.rank != data) {
-          isDifferent = true
-        }
-      } else if (field.getName == "updated") {
-        if (article.updated != data) {
-          isDifferent = true
-        }
-      } else if (field.getName == "article_title") {
-        if (article.title != data) {
-          isDifferent = true
-        }
-      } else if (field.getName == "topics_subtopics") {
-        if (makeTopicsString(article.topics) != data) {
-          isDifferent = true
+      val values = field.getPSFieldValue
+      if (values != null && values.length > 0) {
+        val data: String = values(0).getRawData
+        if (field.getName == "link") {
+          if (article.link != data) {
+            isDifferent = true
+          }
+        } else if (field.getName == "body") {
+          if (article.body != "<![CDATA[" + data + "]]") {
+            isDifferent = true
+          }
+        } else if (field.getName == "rank") {
+          if (article.rank != data) {
+            isDifferent = true
+          }
+        } else if (field.getName == "updated") {
+          if (article.updated != data) {
+            isDifferent = true
+          }
+        } else if (field.getName == "article_title") {
+          if (article.title != data) {
+            isDifferent = true
+          }
+        } else if (field.getName == "topics_subtopics") {
+          if (makeTopicsString(article.topics) != data) {
+            isDifferent = true
+          }
         }
       }
     }
