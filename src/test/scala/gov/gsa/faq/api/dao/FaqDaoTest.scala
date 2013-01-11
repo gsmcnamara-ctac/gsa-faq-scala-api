@@ -94,7 +94,7 @@ class FaqDaoTest extends FeatureSpec with BeforeAndAfter {
 
     scenario("with all results filters") {
 
-      val articles = faqDao.getArticles(null, "id|link|title|body|rank|updated|topic", null)
+      val articles = faqDao.getArticles(null, "id|link|title|body|rank|updated|topic|language", null)
       assert(2020 == articles.size)
 
       var article: Article = null
