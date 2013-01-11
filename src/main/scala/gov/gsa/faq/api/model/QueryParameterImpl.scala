@@ -14,6 +14,7 @@ class QueryParameterImpl extends QueryParameter {
     queryParams += "rank"
     queryParams += "topic"
     queryParams += "subtopic"
+    queryParams += "language"
     queryParams.toList
   }
 }

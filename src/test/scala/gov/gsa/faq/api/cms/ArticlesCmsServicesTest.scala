@@ -42,6 +42,7 @@ class ArticlesCmsServicesTest extends FeatureSpec with BeforeAndAfter {
       fields += ("article_title" -> "title")
       fields += ("body" -> "body")
       fields += ("rank" -> "rank")
+      fields += ("language" -> "language")
       fields += ("updated" -> "updated")
       fields += ("sys_title" -> "title")
       fields += ("topics_subtopics" -> "topic1-subtopic1,subtopic2|topic2-subtopic3,subtopic4")
@@ -53,6 +54,7 @@ class ArticlesCmsServicesTest extends FeatureSpec with BeforeAndAfter {
       article.rank = "rank"
       article.title = "title"
       article.updated = "updated"
+      article.language = "language"
 
       val topics = new Topics()
       var topicList = new ListBuffer[Topic]
@@ -63,7 +65,7 @@ class ArticlesCmsServicesTest extends FeatureSpec with BeforeAndAfter {
       article.topics = topics
 
       when(servicesConnector.getTargetFolders).thenReturn(Array("targetFolder"))
-      when(percussionServices.createItem(fields, "targetFolder", "faqArticle")).thenReturn(1234)
+      when(percussionServices.createItem(fields, "targetFolder", "faqTest")).thenReturn(1234)
 
       assert("1234" === services.createArticle(article))
 
@@ -82,7 +84,7 @@ class ArticlesCmsServicesTest extends FeatureSpec with BeforeAndAfter {
       val connector: ServicesConnector = new ServicesConnector()
       services.servicesConnector = connector
       services.configureServices
-      assert(Array("//Sites/EnterpriseInvestments/faqArticle") === connector.getTargetFolders)
+      assert(Array("//Sites/EnterpriseInvestments/faq", "//Sites/EnterpriseInvestments/faq_es") === connector.getTargetFolders)
     }
 
     scenario("properties file exists") {
@@ -91,7 +93,7 @@ class ArticlesCmsServicesTest extends FeatureSpec with BeforeAndAfter {
       val connector: ServicesConnector = new ServicesConnector()
       services.servicesConnector = connector
       services.configureServices
-      assert(Array("//Sites/EnterpriseInvestments/faqArticle") === connector.getTargetFolders)
+      assert(Array("//Sites/EnterpriseInvestments/faq", "//Sites/EnterpriseInvestments/faq_es") === connector.getTargetFolders)
     }
   }
 
@@ -120,6 +122,7 @@ class ArticlesCmsServicesTest extends FeatureSpec with BeforeAndAfter {
       fields += ("article_title" -> "title")
       fields += ("body" -> "body")
       fields += ("rank" -> "rank")
+      fields += ("language" -> "language")
       fields += ("updated" -> "updated")
       fields += ("sys_title" -> "title")
       fields += ("topics_subtopics" -> "topic1-subtopic1,subtopic2|topic2-subtopic3,subtopic4")
@@ -128,7 +131,7 @@ class ArticlesCmsServicesTest extends FeatureSpec with BeforeAndAfter {
 
       when(percussionServices.loadItem(2l)).thenReturn(null)
       when(servicesConnector.getTargetFolders).thenReturn(Array("targetFolder"))
-      when(percussionServices.createItem(fields, "targetFolder", "faqArticle")).thenReturn(1234l)
+      when(percussionServices.createItem(fields, "targetFolder", "faqTest")).thenReturn(1234l)
 
       assert("1234" === services.updateArticle(article, "2"))
 
@@ -145,6 +148,7 @@ class ArticlesCmsServicesTest extends FeatureSpec with BeforeAndAfter {
       fields += ("article_title" -> "title")
       fields += ("body" -> "body")
       fields += ("rank" -> "rank")
+      fields += ("language" -> "language")
       fields += ("updated" -> "updated")
       fields += ("sys_title" -> "title")
       fields += ("topics_subtopics" -> "topic1-subtopic1,subtopic2|topic2-subtopic3,subtopic4")
@@ -153,7 +157,7 @@ class ArticlesCmsServicesTest extends FeatureSpec with BeforeAndAfter {
 
       when(percussionServices.loadItem(2l)).thenThrow(new Exception("meh"))
       when(servicesConnector.getTargetFolders).thenReturn(Array("targetFolder"))
-      when(percussionServices.createItem(fields, "targetFolder", "faqArticle")).thenReturn(1234l)
+      when(percussionServices.createItem(fields, "targetFolder", "faqTest")).thenReturn(1234l)
 
       assert("1234" === services.updateArticle(article, "2"))
 
@@ -204,6 +208,12 @@ class ArticlesCmsServicesTest extends FeatureSpec with BeforeAndAfter {
     rankValue.setRawData("rank")
     rankField.setPSFieldValue(Array[PSFieldValue](rankValue))
 
+    val langField = new PSField()
+    langField.setName("language")
+    val langValue = new PSFieldValue()
+    langValue.setRawData("language")
+    langField.setPSFieldValue(Array[PSFieldValue](langValue))
+
     val updatedField = new PSField()
     updatedField.setName("updated")
     val updatedValue = new PSFieldValue()
@@ -213,7 +223,7 @@ class ArticlesCmsServicesTest extends FeatureSpec with BeforeAndAfter {
     val topicsField: PSField = makeTopicsField
 
     val item: PSItem = mock(classOf[PSItem])
-    when(item.getFields).thenReturn(Array[PSField](idField, linkField, titleField, bodyField, rankField, updatedField, topicsField))
+    when(item.getFields).thenReturn(Array[PSField](idField, linkField, titleField, bodyField, langField, rankField, updatedField, topicsField))
     when(item.getId).thenReturn(2l)
     item
   }
@@ -223,6 +233,7 @@ class ArticlesCmsServicesTest extends FeatureSpec with BeforeAndAfter {
     article.body = "<![CDATA[body]]"
     article.id = "id"
     article.link = "link"
+    article.language = "language"
     article.rank = "rank"
     article.title = "title"
     article.updated = "updated"
@@ -243,6 +254,7 @@ class ArticlesCmsServicesTest extends FeatureSpec with BeforeAndAfter {
       assert(article.link === "link")
       assert(article.rank === "rank")
       assert(article.title === "title")
+      assert(article.language === "language")
       assert(article.updated === "updated")
       assert(article.topics === new TopicsConverter().convertField(makeTopicsField))
 
@@ -344,6 +356,12 @@ class ArticlesCmsServicesTest extends FeatureSpec with BeforeAndAfter {
       bodyValue.setRawData("body")
       bodyField.setPSFieldValue(Array[PSFieldValue](bodyValue))
 
+      val langField = new PSField()
+      langField.setName("language")
+      val langValue = new PSFieldValue()
+      langValue.setRawData("language")
+      langField.setPSFieldValue(Array[PSFieldValue](langValue))
+
       val rankField = new PSField()
       rankField.setName("rank")
       val rankValue = new PSFieldValue()
@@ -362,7 +380,7 @@ class ArticlesCmsServicesTest extends FeatureSpec with BeforeAndAfter {
       topicsValue.setRawData("topic1-subtopic1,subtopic2|topic2-subtopic3,subtopic4")
       topicsField.setPSFieldValue(Array(topicsValue))
 
-      when(item.getFields).thenReturn(Array[PSField](idField, linkField, titleField, bodyField, rankField, updatedField, topicsField))
+      when(item.getFields).thenReturn(Array[PSField](idField, linkField, titleField, bodyField, langField, rankField, updatedField, topicsField))
 
       when(percussionServices.loadItem(1234)).thenReturn(item)
 
@@ -372,6 +390,7 @@ class ArticlesCmsServicesTest extends FeatureSpec with BeforeAndAfter {
       assert("link" === articles(0).link)
       assert("body" === articles(0).body)
       assert("rank" === articles(0).rank)
+      assert("language" === articles(0).language)
       assert("title" === articles(0).title)
       assert("updated" === articles(0).updated)
 

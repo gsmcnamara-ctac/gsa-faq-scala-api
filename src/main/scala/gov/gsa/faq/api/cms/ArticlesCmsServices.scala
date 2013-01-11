@@ -25,7 +25,7 @@ class ArticlesCmsServices extends PercussionContentServices with LogHelper {
     val targetFolder = servicesConnector.getTargetFolders()(0)
 
     services.login()
-    val id = services.createItem(fields, targetFolder, "faqArticle").toString
+    val id = services.createItem(fields, targetFolder, "faqTest").toString
     services.logout()
     id
   }
@@ -37,6 +37,7 @@ class ArticlesCmsServices extends PercussionContentServices with LogHelper {
     fields += ("article_title" -> article.title)
     val body = article.body.replace("<![CDATA[", "").dropRight("]]".length)
     fields += ("body" -> body)
+    fields += ("language" -> article.language)
     fields += ("rank" -> article.rank)
     fields += ("updated" -> article.updated)
     fields += ("topics_subtopics" -> makeTopicsString(article.topics))
@@ -107,6 +108,8 @@ class ArticlesCmsServices extends PercussionContentServices with LogHelper {
               article.link = data
             } else if (field.getName == "body") {
               article.body = "<![CDATA[" + data + "]]"
+            } else if (field.getName == "language") {
+              article.language = data
             } else if (field.getName == "rank") {
               article.rank = data
             } else if (field.getName == "updated") {
@@ -177,6 +180,8 @@ class ArticlesCmsServices extends PercussionContentServices with LogHelper {
                   article.link = data
                 } else if (field.getName == "body") {
                   article.body = data
+                } else if (field.getName == "language") {
+                  article.language = data
                 } else if (field.getName == "rank") {
                   article.rank = data
                 } else if (field.getName == "updated") {

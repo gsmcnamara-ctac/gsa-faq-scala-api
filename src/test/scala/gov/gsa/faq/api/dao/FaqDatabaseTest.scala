@@ -39,6 +39,7 @@ class FaqDatabaseTest extends FeatureSpec with BeforeAndAfter {
       assert("http://answers.usa.gov/system/web/view/selfservice/templates/USAgov/egredirect.jsp?p_faq_id=9666" === rowSet.getString("link"))
       assert(rowSet.getString("title").matches("Fish and Wildlife Service:.*Student Employment Programs"))
       assert(50.43334 === rowSet.getDouble("rank"))
+      assert("EN" === rowSet.getString("language"))
       assert("Nov 26 2012 04:58:24:000PM" === rowSet.getString("updated"))
       assert(Source.fromInputStream(getClass().getResourceAsStream("/9666.body")).getLines().mkString("\n") === rowSet.getString("body"))
 
@@ -50,7 +51,7 @@ class FaqDatabaseTest extends FeatureSpec with BeforeAndAfter {
       assert("Fish and Wildlife Service (FWS)" === rowSet.getString("name"))
       assert(!rowSet.next())
 
-      rowSet = jdbcTemplate.queryForRowSet("select * from subtopics where topic="+topicId)
+      rowSet = jdbcTemplate.queryForRowSet("select * from subtopics where topic=" + topicId)
       assert(rowSet.next())
       assert("Education" === rowSet.getString("subtopic"))
       assert(rowSet.next())

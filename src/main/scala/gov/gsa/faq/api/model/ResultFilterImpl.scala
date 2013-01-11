@@ -6,7 +6,7 @@ import collection.mutable.ListBuffer
 
 class ResultFilterImpl extends ResultFilter {
 
-  def getResultFilters() : java.util.List[String] = {
+  def getResultFilters(): java.util.List[String] = {
     val resultFilters = new ListBuffer[String]()
     resultFilters += "id"
     resultFilters += "link"
@@ -15,6 +15,7 @@ class ResultFilterImpl extends ResultFilter {
     resultFilters += "rank"
     resultFilters += "updated"
     resultFilters += "topic"
+    resultFilters += "language"
     resultFilters.toList
   }
 }

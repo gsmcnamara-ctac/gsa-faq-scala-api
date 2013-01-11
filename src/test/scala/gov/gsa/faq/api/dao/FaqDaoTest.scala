@@ -16,9 +16,9 @@ import org.scalatest.matchers.ShouldMatchers._
 @RunWith(classOf[JUnitRunner])
 class FaqDaoTest extends FeatureSpec with BeforeAndAfter {
 
-  var database : InMemoryHSQLDatabase = _
-  var faqDao : FaqDao = _
-  var dataSource : DataSource = _
+  var database: InMemoryHSQLDatabase = _
+  var faqDao: FaqDao = _
+  var dataSource: DataSource = _
 
   before {
 
@@ -40,8 +40,9 @@ class FaqDaoTest extends FeatureSpec with BeforeAndAfter {
       article should not be (null)
       assert("http://answers.usa.gov/system/web/view/selfservice/templates/USAgov/egredirect.jsp?p_faq_id=9666" === article.link)
       assert(article.title.matches("Fish and Wildlife Service:.*Student Employment Programs"))
-      assert("<![CDATA["+Source.fromInputStream(getClass().getResourceAsStream("/9666.body")).getLines().mkString("\n")+"]]" === article.body)
+      assert("<![CDATA[" + Source.fromInputStream(getClass().getResourceAsStream("/9666.body")).getLines().mkString("\n") + "]]" === article.body)
       assert(50.43334 === article.rank.toDouble)
+      assert("EN" === article.language)
       assert("Nov 26 2012 04:58:24:000PM" === article.updated)
 
       val topics = article.topics.topic
@@ -55,7 +56,7 @@ class FaqDaoTest extends FeatureSpec with BeforeAndAfter {
 
     scenario("article doesn't exists") {
       val article = faqDao.getArticle("asdf")
-      article should be (null)
+      article should be(null)
     }
   }
 
@@ -63,21 +64,23 @@ class FaqDaoTest extends FeatureSpec with BeforeAndAfter {
 
     scenario("all null params (return all articles all data)") {
 
-      val articles = faqDao.getArticles(null,null,null)
+      val articles = faqDao.getArticles(null, null, null)
       assert(2020 == articles.size, articles.size)
 
-      var article : Article = null
-      articles.foreach { _article =>
-        if(_article.id == "9666") {
-          article = _article
-        }
+      var article: Article = null
+      articles.foreach {
+        _article =>
+          if (_article.id == "9666") {
+            article = _article
+          }
       }
 
       article should not be (null)
       assert("http://answers.usa.gov/system/web/view/selfservice/templates/USAgov/egredirect.jsp?p_faq_id=9666" === article.link)
       assert(article.title.matches("Fish and Wildlife Service:.*Student Employment Programs"))
-      assert("<![CDATA["+Source.fromInputStream(getClass().getResourceAsStream("/9666.body")).getLines().mkString("\n")+"]]" === article.body)
+      assert("<![CDATA[" + Source.fromInputStream(getClass().getResourceAsStream("/9666.body")).getLines().mkString("\n") + "]]" === article.body)
       assert(50.43334 === article.rank.toDouble)
+      assert("EN" === article.language)
       assert("Nov 26 2012 04:58:24:000PM" === article.updated)
 
       val topics = article.topics.topic
@@ -94,18 +97,20 @@ class FaqDaoTest extends FeatureSpec with BeforeAndAfter {
       val articles = faqDao.getArticles(null, "id|link|title|body|rank|updated|topic", null)
       assert(2020 == articles.size)
 
-      var article : Article = null
-      articles.foreach { _article =>
-        if(_article.id == "9666") {
-          article = _article
-        }
+      var article: Article = null
+      articles.foreach {
+        _article =>
+          if (_article.id == "9666") {
+            article = _article
+          }
       }
 
       article should not be (null)
       assert("http://answers.usa.gov/system/web/view/selfservice/templates/USAgov/egredirect.jsp?p_faq_id=9666" === article.link)
       assert(article.title.matches("Fish and Wildlife Service:.*Student Employment Programs"))
-      assert("<![CDATA["+Source.fromInputStream(getClass().getResourceAsStream("/9666.body")).getLines().mkString("\n")+"]]" === article.body)
+      assert("<![CDATA[" + Source.fromInputStream(getClass().getResourceAsStream("/9666.body")).getLines().mkString("\n") + "]]" === article.body)
       assert(50.43334d === article.rank.toDouble)
+      assert("EN" === article.language)
       assert("Nov 26 2012 04:58:24:000PM" === article.updated)
 
       val topics = article.topics.topic
@@ -122,43 +127,50 @@ class FaqDaoTest extends FeatureSpec with BeforeAndAfter {
       val articles = faqDao.getArticles(null, "id", null)
       assert(2020 === articles.size)
 
-      var article : Article = null
-      articles.foreach { _article =>
-        if(_article.id == "9666") {
-          article = _article
-        }
+      var article: Article = null
+      articles.foreach {
+        _article =>
+          if (_article.id == "9666") {
+            article = _article
+          }
       }
 
       article should not be (null)
 
-      article.link should be (null)
-      article.title should be (null)
-      article.body should be (null)
-      article.rank should be (null)
-      article.updated should be (null)
-      article.topics should be (null)
+      article.link should be(null)
+      article.title should be(null)
+      article.body should be(null)
+      article.rank should be(null)
+      article.language should be(null)
+      article.updated should be(null)
+      article.topics should be(null)
     }
 
     scenario("query by body") {
       val articles = faqDao.getArticles("body::*provide information on available state benefits*", null, null)
-      assert(1===articles.size)
+      assert(1 === articles.size)
     }
 
     scenario("query by topic") {
       var articles = faqDao.getArticles("topic::Reference and General Government", null, null)
-      assert(520===articles.size)
+      assert(520 === articles.size)
       articles = faqDao.getArticles("topic::1_Featured Content USA.gov INTERNAL", null, null)
-      assert(10===articles.size)
+      assert(10 === articles.size)
     }
 
     scenario("query by subtopic") {
       val articles = faqDao.getArticles("subtopic::Taxes", null, null)
-      assert(111===articles.size)
+      assert(111 === articles.size)
     }
 
     scenario("query by rank") {
       val articles = faqDao.getArticles("rank:gt:50.0", null, null)
-      assert(1077===articles.size)
+      assert(1077 === articles.size)
+    }
+
+    scenario("query by language") {
+      val articles = faqDao.getArticles("language::EN", null, null)
+      assert(1938 === articles.size)
     }
 
     scenario("query by topic using prefix and sufix wildcard, use id|title|topic as result filter and sort by title") {
@@ -166,7 +178,7 @@ class FaqDaoTest extends FeatureSpec with BeforeAndAfter {
 
       var foundTopics = false
       for (article <- articles) {
-        if(article.topics!=null) {
+        if (article.topics != null) {
           foundTopics = true
         }
       }
@@ -178,7 +190,7 @@ class FaqDaoTest extends FeatureSpec with BeforeAndAfter {
 
       var foundTopics = false
       for (article <- articles) {
-        if(article.topics!=null) {
+        if (article.topics != null) {
           foundTopics = true
         }
       }
@@ -187,15 +199,15 @@ class FaqDaoTest extends FeatureSpec with BeforeAndAfter {
 
     scenario("query by id") {
       val articles = faqDao.getArticles("id::9666", null, null)
-      assert(1===articles.size)
+      assert(1 === articles.size)
     }
 
     scenario("sort by descending id") {
       val articles = faqDao.getArticles(null, null, "-id")
 
-      assert(2020===articles.size)
-      assert("9996"===articles(0).id)
-      assert("10000"===articles(articles.size-1).id)
+      assert(2020 === articles.size)
+      assert("9996" === articles(0).id)
+      assert("10000" === articles(articles.size - 1).id)
     }
   }
 }

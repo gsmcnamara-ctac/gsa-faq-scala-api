@@ -1,7 +1,7 @@
 package gov.gsa.faq.api.dao
 
-import gov.gsa.rest.api.dao.{DatabaseAdministrator}
-import gov.gsa.faq.api.model.{ArticlesConverter, Article, Root}
+import gov.gsa.rest.api.dao.DatabaseAdministrator
+import gov.gsa.faq.api.model.{ArticlesConverter, Article}
 import gov.gsa.faq.api.{Constants, LogHelper}
 import javax.sql.DataSource
 import org.springframework.jdbc.core.{PreparedStatementCreator, JdbcTemplate}
@@ -25,7 +25,7 @@ class FaqDatabase extends DatabaseAdministrator with LogHelper {
 
   def getTableCreationSqls(): Array[String] = {
     Array(
-      "create table articles (id VARCHAR not null, link VARCHAR, title VARCHAR, body VARCHAR, rank DOUBLE, updated VARCHAR, PRIMARY KEY (id))",
+      "create table articles (id VARCHAR not null, link VARCHAR, title VARCHAR, body VARCHAR, rank DOUBLE, language VARCHAR, updated VARCHAR, PRIMARY KEY (id))",
       "create table topics (id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY, article VARCHAR, name VARCHAR)",
       "create table subtopics (id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY, article VARCHAR, topic INTEGER, subtopic VARCHAR)"
     )
@@ -47,13 +47,20 @@ class FaqDatabase extends DatabaseAdministrator with LogHelper {
 
       logger.info("Loading tables with records from '" + xmlPath + "'")
 
-      val articles = new ArticlesConverter().toArticles(xmlPath)
+      val articlesConverter = new ArticlesConverter()
+      val articles = {
+        if (Constants.XML_PATH_ES == xmlPath) {
+          articlesConverter.toArticles(xmlPath, "ES")
+        } else {
+          articlesConverter.toArticles(xmlPath, "EN")
+        }
+      }
 
       for (article: Article <- articles) {
 
         jdbcTemplate.update(new PreparedStatementCreator {
           def createPreparedStatement(connection: Connection): PreparedStatement = {
-            val ps: PreparedStatement = connection.prepareStatement("insert into articles (id, link, title, body, rank, updated) values (?,?,?,?,?,?) ")
+            val ps: PreparedStatement = connection.prepareStatement("insert into articles (id, link, title, body, rank, updated, language) values (?,?,?,?,?,?,?) ")
 
             val articleId = article.id
 
@@ -63,6 +70,7 @@ class FaqDatabase extends DatabaseAdministrator with LogHelper {
             ps.setString(4, article.body)
             ps.setDouble(5, article.rank.toDouble)
             ps.setString(6, article.updated)
+            ps.setString(7, article.language)
 
             if (article.topics != null && article.topics.topic != null) {
               for (topic <- article.topics.topic) {

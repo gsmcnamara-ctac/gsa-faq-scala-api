@@ -13,12 +13,13 @@ class ArticlesConverterTest extends FreeSpec {
 
     "toArticles should marhsall XML as Articles" in {
       val articlesConverter = new ArticlesConverter()
-      val articles: Seq[Article] = articlesConverter.toArticles(Constants.XML_PATH)
-      var article :Article = null
-      articles.foreach{ _article =>
-        if (_article.id=="11924") {
-          article = _article
-        }
+      val articles: Seq[Article] = articlesConverter.toArticles(Constants.XML_PATH, "ES")
+      var article: Article = null
+      articles.foreach {
+        _article =>
+          if (_article.id == "11924") {
+            article = _article
+          }
       }
       assert("http://answers.usa.gov/system/web/view/selfservice/templates/USAgov/egredirect.jsp?p_faq_id=11924" == article.link, article.link)
       assert("* Employment: Foreign Nationals" == article.title, article.title)
