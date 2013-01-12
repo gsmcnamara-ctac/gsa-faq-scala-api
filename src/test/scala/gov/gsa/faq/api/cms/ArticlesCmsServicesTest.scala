@@ -73,7 +73,7 @@ class ArticlesCmsServicesTest extends FeatureSpec with BeforeAndAfter {
       article.topics = topics
 
       when(servicesConnector.getTargetFolders).thenReturn(Array("targetFolderEnglish", "targetFolderSpanish"))
-      when(percussionServices.createItem(fields, "targetFolderEnglish", "faqTest")).thenReturn(1234)
+      when(percussionServices.createItem(fields, "targetFolderEnglish", "gsaArticle")).thenReturn(1234)
 
       assert("1234" === services.createArticle(article))
 
@@ -97,7 +97,7 @@ class ArticlesCmsServicesTest extends FeatureSpec with BeforeAndAfter {
       article.topics = topics
 
       when(servicesConnector.getTargetFolders).thenReturn(Array("targetFolderEnglish", "targetFolderSpanish"))
-      when(percussionServices.createItem(fields, "targetFolderSpanish", "faqTest")).thenReturn(1234)
+      when(percussionServices.createItem(fields, "targetFolderSpanish", "gsaArticle")).thenReturn(1234)
 
       assert("1234" === services.createArticle(article))
 
@@ -166,7 +166,7 @@ class ArticlesCmsServicesTest extends FeatureSpec with BeforeAndAfter {
 
       when(percussionServices.loadItem(2l)).thenReturn(null)
       when(servicesConnector.getTargetFolders).thenReturn(Array("targetFolderEnglish", "targetFolderSpanish"))
-      when(percussionServices.createItem(fields, "targetFolderEnglish", "faqTest")).thenReturn(1234l)
+      when(percussionServices.createItem(fields, "targetFolderEnglish", "gsaArticle")).thenReturn(1234l)
 
       assert("1234" === services.updateArticle(article, "2"))
 
@@ -182,7 +182,7 @@ class ArticlesCmsServicesTest extends FeatureSpec with BeforeAndAfter {
 
       when(percussionServices.loadItem(2l)).thenThrow(new Exception("meh"))
       when(servicesConnector.getTargetFolders).thenReturn(Array("targetFolderEnglish", "targetFolderSpanish"))
-      when(percussionServices.createItem(fields, "targetFolderEnglish", "faqTest")).thenReturn(1234l)
+      when(percussionServices.createItem(fields, "targetFolderEnglish", "gsaArticle")).thenReturn(1234l)
 
       assert("1234" === services.updateArticle(article, "2"))
 
@@ -386,7 +386,7 @@ class ArticlesCmsServicesTest extends FeatureSpec with BeforeAndAfter {
       when(percussionServices.findFolderChildren(Constants.XML_PATH)).thenReturn(summaries)
 
       val reference: Reference = mock(classOf[Reference])
-      when(reference.getName).thenReturn("faqArticle")
+      when(reference.getName).thenReturn("gsaArticle")
 
       when(summary.getContentType).thenReturn(reference)
 

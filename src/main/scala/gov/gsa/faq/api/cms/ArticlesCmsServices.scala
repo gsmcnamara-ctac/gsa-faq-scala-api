@@ -31,7 +31,7 @@ class ArticlesCmsServices extends PercussionContentServices with LogHelper {
     }
 
     services.login()
-    val id = services.createItem(fields, targetFolder, "faqTest").toString
+    val id = services.createItem(fields, targetFolder, "gsaArticle").toString
     services.logout()
     id
   }
@@ -202,7 +202,7 @@ class ArticlesCmsServices extends PercussionContentServices with LogHelper {
                 }
               }
             }
-            if (contentTypeName(summary) == "faqArticle") {
+            if (contentTypeName(summary) == "gsaArticle") {
               val article: Article = new Article()
               article.language = language
               val psItem = services.loadItem(summary.getId)
