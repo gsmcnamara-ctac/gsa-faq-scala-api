@@ -40,7 +40,7 @@ class ArticlesCmsServices extends PercussionContentServices with LogHelper {
     var fields = Map[String, Object]()
     fields += ("faq_id" -> article.id)
     fields += ("faq_src_link" -> article.link)
-    fields += ("display title" -> article.title)
+    fields += ("displaytitle" -> article.title)
     fields += ("faq_src_title" -> article.title)
     val body = article.body.replace("<![CDATA[", "").dropRight("]]".length)
     fields += ("text" -> body)
