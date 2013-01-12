@@ -36,14 +36,15 @@ class ArticlesCmsServicesTest extends FeatureSpec with BeforeAndAfter {
 
     def getFields: Map[String, Object] = {
       var fields = Map[String, Object]()
-      fields += ("id" -> "id")
-      fields += ("link" -> "link")
-      fields += ("article_title" -> "title")
-      fields += ("body" -> "body")
-      fields += ("rank" -> "rank")
-      fields += ("updated" -> "updated")
-      fields += ("sys_title" -> "title")
-      fields += ("topics_subtopics" -> "topic1-subtopic1,subtopic2|topic2-subtopic3,subtopic4")
+      fields += ("faq_id" -> "id")
+      fields += ("faq_src_link" -> "link")
+      fields += ("display title" -> "title")
+      fields += ("faq_src_title" -> "title")
+      fields += ("description" -> "body")
+      fields += ("text" -> "body")
+      fields += ("faq_rank" -> "rank")
+      fields += ("faq_updated" -> "updated")
+      fields += ("faq_topic_subtopic" -> "topic1-subtopic1,subtopic2|topic2-subtopic3,subtopic4")
       fields
     }
 
@@ -133,14 +134,15 @@ class ArticlesCmsServicesTest extends FeatureSpec with BeforeAndAfter {
 
     def makeFields: Map[String, Object] = {
       var fields = Map[String, Object]()
-      fields += ("id" -> "id")
-      fields += ("link" -> "link")
-      fields += ("article_title" -> "title")
-      fields += ("body" -> "body")
-      fields += ("rank" -> "rank")
-      fields += ("updated" -> "updated")
-      fields += ("sys_title" -> "title")
-      fields += ("topics_subtopics" -> "topic1-subtopic1,subtopic2|topic2-subtopic3,subtopic4")
+      fields += ("faq_id" -> "id")
+      fields += ("faq_src_link" -> "link")
+      fields += ("display title" -> "title")
+      fields += ("faq_src_title" -> "title")
+      fields += ("description" -> "body")
+      fields += ("text" -> "body")
+      fields += ("faq_rank" -> "rank")
+      fields += ("faq_updated" -> "updated")
+      fields += ("faq_topic_subtopic" -> "topic1-subtopic1,subtopic2|topic2-subtopic3,subtopic4")
       fields
     }
 
@@ -194,7 +196,7 @@ class ArticlesCmsServicesTest extends FeatureSpec with BeforeAndAfter {
 
   def makeTopicsField: PSField = {
     val topicsField = new PSField()
-    topicsField.setName("topics_subtopics")
+    topicsField.setName("faq_topic_subtopic")
     val topicsValue: PSFieldValue = new PSFieldValue()
     topicsValue.setRawData("topic1-subtopic1,subtopic2|topic2-subtopic3,subtopic4")
     topicsField.setPSFieldValue(Array(topicsValue))
@@ -204,37 +206,49 @@ class ArticlesCmsServicesTest extends FeatureSpec with BeforeAndAfter {
   def makeItem(): PSItem = {
 
     val idField = new PSField()
-    idField.setName("id")
+    idField.setName("faq_id")
     val idValue = new PSFieldValue()
     idValue.setRawData("id")
     idField.setPSFieldValue(Array[PSFieldValue](idValue))
 
     val linkField = new PSField()
-    linkField.setName("link")
+    linkField.setName("faq_src_link")
     val linkValue = new PSFieldValue()
     linkValue.setRawData("link")
     linkField.setPSFieldValue(Array[PSFieldValue](linkValue))
 
     val titleField = new PSField()
-    titleField.setName("article_title")
+    titleField.setName("display title")
     val titleValue = new PSFieldValue()
     titleValue.setRawData("title")
     titleField.setPSFieldValue(Array[PSFieldValue](titleValue))
 
+    val titleField2 = new PSField()
+    titleField2.setName("faq_src_title")
+    val titleValue2 = new PSFieldValue()
+    titleValue2.setRawData("title")
+    titleField2.setPSFieldValue(Array[PSFieldValue](titleValue2))
+
     val bodyField = new PSField()
-    bodyField.setName("body")
+    bodyField.setName("text")
     val bodyValue = new PSFieldValue()
     bodyValue.setRawData("body")
     bodyField.setPSFieldValue(Array[PSFieldValue](bodyValue))
 
+    val bodyField2 = new PSField()
+    bodyField2.setName("description")
+    val bodyValue2 = new PSFieldValue()
+    bodyValue2.setRawData("body")
+    bodyField2.setPSFieldValue(Array[PSFieldValue](bodyValue2))
+
     val rankField = new PSField()
-    rankField.setName("rank")
+    rankField.setName("faq_rank")
     val rankValue = new PSFieldValue()
     rankValue.setRawData("rank")
     rankField.setPSFieldValue(Array[PSFieldValue](rankValue))
 
     val updatedField = new PSField()
-    updatedField.setName("updated")
+    updatedField.setName("faq_updated")
     val updatedValue = new PSFieldValue()
     updatedValue.setRawData("updated")
     updatedField.setPSFieldValue(Array[PSFieldValue](updatedValue))
@@ -242,7 +256,7 @@ class ArticlesCmsServicesTest extends FeatureSpec with BeforeAndAfter {
     val topicsField: PSField = makeTopicsField
 
     val item: PSItem = mock(classOf[PSItem])
-    when(item.getFields).thenReturn(Array[PSField](idField, linkField, titleField, bodyField, rankField, updatedField, topicsField))
+    when(item.getFields).thenReturn(Array[PSField](idField, linkField, titleField, titleField2, bodyField, bodyField2, rankField, updatedField, topicsField))
     when(item.getId).thenReturn(2l)
     item
   }
@@ -289,7 +303,7 @@ class ArticlesCmsServicesTest extends FeatureSpec with BeforeAndAfter {
     scenario("load 1 item from the CMS and return a single Article with no topics") {
 
       val idField = new PSField()
-      idField.setName("id")
+      idField.setName("faq_id")
       val idValue = new PSFieldValue()
       idValue.setRawData("id")
       idField.setPSFieldValue(Array[PSFieldValue](idValue))
@@ -318,7 +332,7 @@ class ArticlesCmsServicesTest extends FeatureSpec with BeforeAndAfter {
     scenario("load 1 item from the CMS that is not in one of the target folders") {
 
       val idField = new PSField()
-      idField.setName("id")
+      idField.setName("faq_id")
       val idValue = new PSFieldValue()
       idValue.setRawData("id")
       idField.setPSFieldValue(Array[PSFieldValue](idValue))
@@ -345,7 +359,7 @@ class ArticlesCmsServicesTest extends FeatureSpec with BeforeAndAfter {
     scenario("load 1 item from the CMS with a null field value") {
 
       val idField = new PSField()
-      idField.setName("id")
+      idField.setName("faq_id")
       val idValue = new PSFieldValue()
       idValue.setRawData("id")
       idField.setPSFieldValue(Array[PSFieldValue](idValue))
@@ -394,48 +408,60 @@ class ArticlesCmsServicesTest extends FeatureSpec with BeforeAndAfter {
       when(summary.getId).thenReturn(1234)
 
       val idField = new PSField()
-      idField.setName("id")
+      idField.setName("faq_id")
       val idValue = new PSFieldValue()
       idValue.setRawData("id")
       idField.setPSFieldValue(Array[PSFieldValue](idValue))
 
       val linkField = new PSField()
-      linkField.setName("link")
+      linkField.setName("faq_src_link")
       val linkValue = new PSFieldValue()
       linkValue.setRawData("link")
       linkField.setPSFieldValue(Array[PSFieldValue](linkValue))
 
       val titleField = new PSField()
-      titleField.setName("article_title")
+      titleField.setName("display title")
       val titleValue = new PSFieldValue()
       titleValue.setRawData("title")
       titleField.setPSFieldValue(Array[PSFieldValue](titleValue))
 
+      val titleField2 = new PSField()
+      titleField2.setName("faq_src_title")
+      val titleValue2 = new PSFieldValue()
+      titleValue2.setRawData("title")
+      titleField2.setPSFieldValue(Array[PSFieldValue](titleValue2))
+
       val bodyField = new PSField()
-      bodyField.setName("body")
+      bodyField.setName("text")
       val bodyValue = new PSFieldValue()
       bodyValue.setRawData("body")
       bodyField.setPSFieldValue(Array[PSFieldValue](bodyValue))
 
+      val bodyField2 = new PSField()
+      bodyField2.setName("description")
+      val bodyValue2 = new PSFieldValue()
+      bodyValue2.setRawData("body")
+      bodyField2.setPSFieldValue(Array[PSFieldValue](bodyValue2))
+
       val rankField = new PSField()
-      rankField.setName("rank")
+      rankField.setName("faq_rank")
       val rankValue = new PSFieldValue()
       rankValue.setRawData("rank")
       rankField.setPSFieldValue(Array[PSFieldValue](rankValue))
 
       val updatedField = new PSField()
-      updatedField.setName("updated")
+      updatedField.setName("faq_updated")
       val updatedValue = new PSFieldValue()
       updatedValue.setRawData("updated")
       updatedField.setPSFieldValue(Array[PSFieldValue](updatedValue))
 
       val topicsField = new PSField()
-      topicsField.setName("topics_subtopics")
+      topicsField.setName("faq_topic_subtopic")
       val topicsValue: PSFieldValue = new PSFieldValue()
       topicsValue.setRawData("topic1-subtopic1,subtopic2|topic2-subtopic3,subtopic4")
       topicsField.setPSFieldValue(Array(topicsValue))
 
-      when(item.getFields).thenReturn(Array[PSField](idField, linkField, titleField, bodyField, rankField, updatedField, topicsField))
+      when(item.getFields).thenReturn(Array[PSField](idField, linkField, titleField, titleField2, bodyField, bodyField2, rankField, updatedField, topicsField))
 
       when(percussionServices.loadItem(1234)).thenReturn(item)
 
@@ -443,7 +469,7 @@ class ArticlesCmsServicesTest extends FeatureSpec with BeforeAndAfter {
       assert(1 === articles.size)
       assert("id" === articles(0).id)
       assert("link" === articles(0).link)
-      assert("body" === articles(0).body)
+      assert("<![CDATA[body]]" === articles(0).body)
       assert("rank" === articles(0).rank)
       assert("EN" === articles(0).language)
       assert("title" === articles(0).title)

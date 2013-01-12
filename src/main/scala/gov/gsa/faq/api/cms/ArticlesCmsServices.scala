@@ -19,7 +19,7 @@ class ArticlesCmsServices extends PercussionContentServices with LogHelper {
   def createArticle(article: Article): String = {
 
     var fields = mapArticleToFields(article)
-    fields += ("sys_title" -> article.title)
+    //    fields += ("sys_title" -> article.title)
 
     configureServices
     val targetFolder = {
@@ -38,14 +38,16 @@ class ArticlesCmsServices extends PercussionContentServices with LogHelper {
 
   def mapArticleToFields(article: Article): Map[String, Object] = {
     var fields = Map[String, Object]()
-    fields += ("id" -> article.id)
-    fields += ("link" -> article.link)
-    fields += ("article_title" -> article.title)
+    fields += ("faq_id" -> article.id)
+    fields += ("faq_src_link" -> article.link)
+    fields += ("display title" -> article.title)
+    fields += ("faq_src_title" -> article.title)
     val body = article.body.replace("<![CDATA[", "").dropRight("]]".length)
-    fields += ("body" -> body)
-    fields += ("rank" -> article.rank)
-    fields += ("updated" -> article.updated)
-    fields += ("topics_subtopics" -> makeTopicsString(article.topics))
+    fields += ("text" -> body)
+    fields += ("description" -> body)
+    fields += ("faq_rank" -> article.rank)
+    fields += ("faq_updated" -> article.updated)
+    fields += ("faq_topic_subtopic" -> makeTopicsString(article.topics))
     fields
   }
 
@@ -129,21 +131,19 @@ class ArticlesCmsServices extends PercussionContentServices with LogHelper {
           val value = field.getPSFieldValue
           if (value != null && value.length > 0) {
             val data: String = value(0).getRawData
-            if (field.getName == "id") {
+            if (field.getName == "faq_id") {
               article.id = data
-            } else if (field.getName == "link") {
+            } else if (field.getName == "faq_src_link") {
               article.link = data
-            } else if (field.getName == "body") {
+            } else if (field.getName == "text") {
               article.body = "<![CDATA[" + data + "]]"
-            } else if (field.getName == "language") {
-              article.language = data
-            } else if (field.getName == "rank") {
+            } else if (field.getName == "faq_rank") {
               article.rank = data
-            } else if (field.getName == "updated") {
+            } else if (field.getName == "faq_updated") {
               article.updated = data
-            } else if (field.getName == "article_title") {
+            } else if (field.getName == "faq_src_title") {
               article.title = data
-            } else if (field.getName == "topics_subtopics") {
+            } else if (field.getName == "faq_topic_subtopic") {
               article.topics = new TopicsConverter().convertField(field)
             }
           }
@@ -211,21 +211,19 @@ class ArticlesCmsServices extends PercussionContentServices with LogHelper {
                 val value = field.getPSFieldValue
                 if (value != null) {
                   val data: String = value(0).getRawData
-                  if (field.getName == "id") {
+                  if (field.getName == "faq_id") {
                     article.id = data
-                  } else if (field.getName == "link") {
+                  } else if (field.getName == "faq_src_link") {
                     article.link = data
-                  } else if (field.getName == "body") {
-                    article.body = data
-                  } else if (field.getName == "language") {
-                    article.language = data
-                  } else if (field.getName == "rank") {
+                  } else if (field.getName == "text") {
+                    article.body = "<![CDATA[" + data + "]]"
+                  } else if (field.getName == "faq_rank") {
                     article.rank = data
-                  } else if (field.getName == "updated") {
+                  } else if (field.getName == "faq_updated") {
                     article.updated = data
-                  } else if (field.getName == "article_title") {
+                  } else if (field.getName == "faq_src_title") {
                     article.title = data
-                  } else if (field.getName == "topics_subtopics") {
+                  } else if (field.getName == "faq_topic_subtopic") {
                     article.topics = new TopicsConverter().convertField(field)
                   }
                 }
