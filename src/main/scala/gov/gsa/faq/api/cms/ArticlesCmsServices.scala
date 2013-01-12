@@ -22,7 +22,13 @@ class ArticlesCmsServices extends PercussionContentServices with LogHelper {
     fields += ("sys_title" -> article.title)
 
     configureServices
-    val targetFolder = servicesConnector.getTargetFolders()(0)
+    val targetFolder = {
+      if (article.language == "ES") {
+        servicesConnector.getTargetFolders()(1)
+      } else {
+        servicesConnector.getTargetFolders()(0)
+      }
+    }
 
     services.login()
     val id = services.createItem(fields, targetFolder, "faqTest").toString
@@ -37,7 +43,6 @@ class ArticlesCmsServices extends PercussionContentServices with LogHelper {
     fields += ("article_title" -> article.title)
     val body = article.body.replace("<![CDATA[", "").dropRight("]]".length)
     fields += ("body" -> body)
-    fields += ("language" -> article.language)
     fields += ("rank" -> article.rank)
     fields += ("updated" -> article.updated)
     fields += ("topics_subtopics" -> makeTopicsString(article.topics))
@@ -92,12 +97,34 @@ class ArticlesCmsServices extends PercussionContentServices with LogHelper {
   def getArticle(id: Long): Article = {
     configureServices
 
+    def getLanguage(psItem: PSItem): String = {
+      val language = {
+        if (psItem != null) {
+          val targetFolder = psItem.getFolders()(0).getPath
+          if (targetFolder == Constants.XML_PATH) {
+            "EN"
+          } else if (targetFolder == Constants.XML_PATH_ES) {
+            "ES"
+          } else {
+            null
+          }
+        } else {
+          null
+        }
+      }
+      language
+    }
+
     try {
       services.login()
+
       val psItem = services.loadItem(id)
-      if (psItem != null) {
-        val fields = psItem.getFields
+      val language: String = getLanguage(psItem)
+
+      if (language != null) {
         val article: Article = new Article()
+        article.language = language
+        val fields = psItem.getFields
         for (field <- fields) {
           val value = field.getPSFieldValue
           if (value != null && value.length > 0) {
@@ -141,77 +168,90 @@ class ArticlesCmsServices extends PercussionContentServices with LogHelper {
 
   def getAllArticles(): List[Article] = {
 
+    val articles = new ListBuffer[Article]()
+
     configureServices
-    val targetFolder = servicesConnector.getTargetFolders()(0)
+    val targetFolders = servicesConnector.getTargetFolders()
+    for (targetFolder <- targetFolders) {
 
-    try {
-      services.login()
+      val language = {
+        if (targetFolder == Constants.XML_PATH) {
+          "EN"
+        } else {
+          "ES"
+        }
+      }
 
-      val summaries: Array[PSItemSummary] = services.findFolderChildren(targetFolder)
-      if (summaries.length > 0) {
+      try {
+        services.login()
 
-        val articles = new ListBuffer[Article]()
+        val summaries: Array[PSItemSummary] = services.findFolderChildren(targetFolder)
+        if (summaries.length > 0) {
 
-        for (summary <- summaries) {
-          val contentTypeName = (summary: PSItemSummary) => {
-            val contentType = summary.getContentType
-            if (contentType == null) {
-              logger.error("ContentType was null for PSItemSummary with id=" + summary.getId())
-            } else {
-              if (contentType.getName == null || contentType.getName.length == 0) {
-                logger.error("ContentType.name was null for PSItemSummary with id=" + summary.getId())
-                null
+          for (summary <- summaries) {
+            val contentTypeName = (summary: PSItemSummary) => {
+              val contentType = summary.getContentType
+              if (contentType == null) {
+                logger.error("ContentType was null for PSItemSummary with id=" + summary.getId())
               } else {
-                contentType.getName
-              }
-            }
-          }
-          if (contentTypeName(summary) == "faqArticle") {
-            val psItem = services.loadItem(summary.getId)
-            val fields = psItem.getFields
-            val article: Article = new Article()
-            for (field <- fields) {
-              val value = field.getPSFieldValue
-              if (value != null) {
-                val data: String = value(0).getRawData
-                if (field.getName == "id") {
-                  article.id = data
-                } else if (field.getName == "link") {
-                  article.link = data
-                } else if (field.getName == "body") {
-                  article.body = data
-                } else if (field.getName == "language") {
-                  article.language = data
-                } else if (field.getName == "rank") {
-                  article.rank = data
-                } else if (field.getName == "updated") {
-                  article.updated = data
-                } else if (field.getName == "article_title") {
-                  article.title = data
-                } else if (field.getName == "topics_subtopics") {
-                  article.topics = new TopicsConverter().convertField(field)
+                if (contentType.getName == null || contentType.getName.length == 0) {
+                  logger.error("ContentType.name was null for PSItemSummary with id=" + summary.getId())
+                  null
+                } else {
+                  contentType.getName
                 }
               }
             }
-            articles += article
+            if (contentTypeName(summary) == "faqArticle") {
+              val article: Article = new Article()
+              article.language = language
+              val psItem = services.loadItem(summary.getId)
+              val fields = psItem.getFields
+              for (field <- fields) {
+                val value = field.getPSFieldValue
+                if (value != null) {
+                  val data: String = value(0).getRawData
+                  if (field.getName == "id") {
+                    article.id = data
+                  } else if (field.getName == "link") {
+                    article.link = data
+                  } else if (field.getName == "body") {
+                    article.body = data
+                  } else if (field.getName == "language") {
+                    article.language = data
+                  } else if (field.getName == "rank") {
+                    article.rank = data
+                  } else if (field.getName == "updated") {
+                    article.updated = data
+                  } else if (field.getName == "article_title") {
+                    article.title = data
+                  } else if (field.getName == "topics_subtopics") {
+                    article.topics = new TopicsConverter().convertField(field)
+                  }
+                }
+              }
+              articles += article
+            }
           }
+          articles.toList
+        } else {
+          null
         }
-        articles.toList
-      } else {
-        null
-      }
-    } catch {
-      case e: Exception => {
-        logger.error(e.getMessage)
-        null
-      }
-    } finally {
-      try {
-        services.logout()
       } catch {
-        case e: Exception => (logger.error(e.getMessage))
+        case e: Exception => {
+          logger.error(e.getMessage)
+          null
+        }
+      } finally {
+        try {
+          services.logout()
+        } catch {
+          case e: Exception => (logger.error(e.getMessage))
+        }
       }
     }
+
+    articles.toList
   }
 
   def makeTopicsString(topics: Topics): String = {

@@ -34,19 +34,20 @@ class ArticlesCmsServicesTest extends FeatureSpec with BeforeAndAfter {
 
   feature("createArticle") {
 
-    scenario("article has all fields, two topics each with 2 subtopics") {
-
+    def getFields: Map[String, Object] = {
       var fields = Map[String, Object]()
       fields += ("id" -> "id")
       fields += ("link" -> "link")
       fields += ("article_title" -> "title")
       fields += ("body" -> "body")
       fields += ("rank" -> "rank")
-      fields += ("language" -> "language")
       fields += ("updated" -> "updated")
       fields += ("sys_title" -> "title")
       fields += ("topics_subtopics" -> "topic1-subtopic1,subtopic2|topic2-subtopic3,subtopic4")
+      fields
+    }
 
+    def getArticle: Article = {
       val article = new Article()
       article.body = "<![CDATA[body]]"
       article.id = "id"
@@ -54,7 +55,14 @@ class ArticlesCmsServicesTest extends FeatureSpec with BeforeAndAfter {
       article.rank = "rank"
       article.title = "title"
       article.updated = "updated"
-      article.language = "language"
+      article
+    }
+
+    scenario("English article has all fields, two topics each with 2 subtopics") {
+
+      val fields = getFields
+      val article = getArticle
+      article.language = "EN"
 
       val topics = new Topics()
       var topicList = new ListBuffer[Topic]
@@ -64,8 +72,32 @@ class ArticlesCmsServicesTest extends FeatureSpec with BeforeAndAfter {
 
       article.topics = topics
 
-      when(servicesConnector.getTargetFolders).thenReturn(Array("targetFolder"))
-      when(percussionServices.createItem(fields, "targetFolder", "faqTest")).thenReturn(1234)
+      when(servicesConnector.getTargetFolders).thenReturn(Array("targetFolderEnglish", "targetFolderSpanish"))
+      when(percussionServices.createItem(fields, "targetFolderEnglish", "faqTest")).thenReturn(1234)
+
+      assert("1234" === services.createArticle(article))
+
+      verify(percussionServices).login()
+      verify(servicesConnector).configureServices(services, Constants.DATA_DIR, Constants.SERVICES_PROPS_NAME)
+      verify(percussionServices).logout()
+    }
+
+    scenario("Spanish article has all fields, two topics each with 2 subtopics") {
+
+      val fields = getFields
+      val article = getArticle
+      article.language = "ES"
+
+      val topics = new Topics()
+      var topicList = new ListBuffer[Topic]
+      topicList += new Topic("topic1", new Subtopics(List("subtopic1", "subtopic2")))
+      topicList += new Topic("topic2", new Subtopics(List("subtopic3", "subtopic4")))
+      topics.topic = topicList.toList
+
+      article.topics = topics
+
+      when(servicesConnector.getTargetFolders).thenReturn(Array("targetFolderEnglish", "targetFolderSpanish"))
+      when(percussionServices.createItem(fields, "targetFolderSpanish", "faqTest")).thenReturn(1234)
 
       assert("1234" === services.createArticle(article))
 
@@ -99,6 +131,19 @@ class ArticlesCmsServicesTest extends FeatureSpec with BeforeAndAfter {
 
   feature("updateArticle") {
 
+    def makeFields: Map[String, Object] = {
+      var fields = Map[String, Object]()
+      fields += ("id" -> "id")
+      fields += ("link" -> "link")
+      fields += ("article_title" -> "title")
+      fields += ("body" -> "body")
+      fields += ("rank" -> "rank")
+      fields += ("updated" -> "updated")
+      fields += ("sys_title" -> "title")
+      fields += ("topics_subtopics" -> "topic1-subtopic1,subtopic2|topic2-subtopic3,subtopic4")
+      fields
+    }
+
     scenario("item exists") {
 
       val item = makeItem()
@@ -116,22 +161,12 @@ class ArticlesCmsServicesTest extends FeatureSpec with BeforeAndAfter {
 
     scenario("item doesn't exist") {
 
-      var fields = Map[String, Object]()
-      fields += ("id" -> "id")
-      fields += ("link" -> "link")
-      fields += ("article_title" -> "title")
-      fields += ("body" -> "body")
-      fields += ("rank" -> "rank")
-      fields += ("language" -> "language")
-      fields += ("updated" -> "updated")
-      fields += ("sys_title" -> "title")
-      fields += ("topics_subtopics" -> "topic1-subtopic1,subtopic2|topic2-subtopic3,subtopic4")
-
+      val fields = makeFields
       val article = makeArticle
 
       when(percussionServices.loadItem(2l)).thenReturn(null)
-      when(servicesConnector.getTargetFolders).thenReturn(Array("targetFolder"))
-      when(percussionServices.createItem(fields, "targetFolder", "faqTest")).thenReturn(1234l)
+      when(servicesConnector.getTargetFolders).thenReturn(Array("targetFolderEnglish", "targetFolderSpanish"))
+      when(percussionServices.createItem(fields, "targetFolderEnglish", "faqTest")).thenReturn(1234l)
 
       assert("1234" === services.updateArticle(article, "2"))
 
@@ -142,22 +177,12 @@ class ArticlesCmsServicesTest extends FeatureSpec with BeforeAndAfter {
 
     scenario("loadItem throws") {
 
-      var fields = Map[String, Object]()
-      fields += ("id" -> "id")
-      fields += ("link" -> "link")
-      fields += ("article_title" -> "title")
-      fields += ("body" -> "body")
-      fields += ("rank" -> "rank")
-      fields += ("language" -> "language")
-      fields += ("updated" -> "updated")
-      fields += ("sys_title" -> "title")
-      fields += ("topics_subtopics" -> "topic1-subtopic1,subtopic2|topic2-subtopic3,subtopic4")
-
+      val fields = makeFields
       val article = makeArticle
 
       when(percussionServices.loadItem(2l)).thenThrow(new Exception("meh"))
-      when(servicesConnector.getTargetFolders).thenReturn(Array("targetFolder"))
-      when(percussionServices.createItem(fields, "targetFolder", "faqTest")).thenReturn(1234l)
+      when(servicesConnector.getTargetFolders).thenReturn(Array("targetFolderEnglish", "targetFolderSpanish"))
+      when(percussionServices.createItem(fields, "targetFolderEnglish", "faqTest")).thenReturn(1234l)
 
       assert("1234" === services.updateArticle(article, "2"))
 
@@ -208,12 +233,6 @@ class ArticlesCmsServicesTest extends FeatureSpec with BeforeAndAfter {
     rankValue.setRawData("rank")
     rankField.setPSFieldValue(Array[PSFieldValue](rankValue))
 
-    val langField = new PSField()
-    langField.setName("language")
-    val langValue = new PSFieldValue()
-    langValue.setRawData("language")
-    langField.setPSFieldValue(Array[PSFieldValue](langValue))
-
     val updatedField = new PSField()
     updatedField.setName("updated")
     val updatedValue = new PSFieldValue()
@@ -223,7 +242,7 @@ class ArticlesCmsServicesTest extends FeatureSpec with BeforeAndAfter {
     val topicsField: PSField = makeTopicsField
 
     val item: PSItem = mock(classOf[PSItem])
-    when(item.getFields).thenReturn(Array[PSField](idField, linkField, titleField, bodyField, langField, rankField, updatedField, topicsField))
+    when(item.getFields).thenReturn(Array[PSField](idField, linkField, titleField, bodyField, rankField, updatedField, topicsField))
     when(item.getId).thenReturn(2l)
     item
   }
@@ -233,7 +252,7 @@ class ArticlesCmsServicesTest extends FeatureSpec with BeforeAndAfter {
     article.body = "<![CDATA[body]]"
     article.id = "id"
     article.link = "link"
-    article.language = "language"
+    article.language = "EN"
     article.rank = "rank"
     article.title = "title"
     article.updated = "updated"
@@ -246,6 +265,10 @@ class ArticlesCmsServicesTest extends FeatureSpec with BeforeAndAfter {
     scenario("load 1 item from the CMS and return a single Article") {
 
       val item = makeItem
+      val folders = new PSItemFolders()
+      folders.setPath(Constants.XML_PATH)
+      when(item.getFolders).thenReturn(Array(folders))
+
       when(percussionServices.loadItem(2l)).thenReturn(item)
 
       val article = services.getArticle(2l)
@@ -254,7 +277,7 @@ class ArticlesCmsServicesTest extends FeatureSpec with BeforeAndAfter {
       assert(article.link === "link")
       assert(article.rank === "rank")
       assert(article.title === "title")
-      assert(article.language === "language")
+      assert(article.language === "EN")
       assert(article.updated === "updated")
       assert(article.topics === new TopicsConverter().convertField(makeTopicsField))
 
@@ -272,6 +295,11 @@ class ArticlesCmsServicesTest extends FeatureSpec with BeforeAndAfter {
       idField.setPSFieldValue(Array[PSFieldValue](idValue))
 
       val item: PSItem = mock(classOf[PSItem])
+
+      val folders = new PSItemFolders()
+      folders.setPath(Constants.XML_PATH_ES)
+      when(item.getFolders).thenReturn(Array(folders))
+
       when(item.getFields).thenReturn(Array[PSField](idField))
       when(item.getId).thenReturn(2l)
 
@@ -279,7 +307,35 @@ class ArticlesCmsServicesTest extends FeatureSpec with BeforeAndAfter {
 
       val article = services.getArticle(2l)
       assert(article.id === "id")
+      assert(article.language === "ES")
       article.topics should be(null)
+
+      verify(percussionServices).login()
+      verify(servicesConnector).configureServices(services, Constants.DATA_DIR, Constants.SERVICES_PROPS_NAME)
+      verify(percussionServices).logout()
+    }
+
+    scenario("load 1 item from the CMS that is not in one of the target folders") {
+
+      val idField = new PSField()
+      idField.setName("id")
+      val idValue = new PSFieldValue()
+      idValue.setRawData("id")
+      idField.setPSFieldValue(Array[PSFieldValue](idValue))
+
+      val item: PSItem = mock(classOf[PSItem])
+
+      val folders = new PSItemFolders()
+      folders.setPath("hamburger")
+      when(item.getFolders).thenReturn(Array(folders))
+
+      when(item.getFields).thenReturn(Array[PSField](idField))
+      when(item.getId).thenReturn(2l)
+
+      when(percussionServices.loadItem(2l)).thenReturn(item)
+
+      val article = services.getArticle(2l)
+      article should be(null)
 
       verify(percussionServices).login()
       verify(servicesConnector).configureServices(services, Constants.DATA_DIR, Constants.SERVICES_PROPS_NAME)
@@ -300,6 +356,11 @@ class ArticlesCmsServicesTest extends FeatureSpec with BeforeAndAfter {
       linkValue.setRawData("link")
 
       val item: PSItem = mock(classOf[PSItem])
+
+      val folders = new PSItemFolders()
+      folders.setPath(Constants.XML_PATH_ES)
+      when(item.getFolders).thenReturn(Array(folders))
+
       when(item.getFields).thenReturn(Array[PSField](idField))
       when(item.getId).thenReturn(2l)
 
@@ -319,10 +380,10 @@ class ArticlesCmsServicesTest extends FeatureSpec with BeforeAndAfter {
 
     scenario("load 1 items from the CMS and return a List of 1 Articles") {
 
-      when(servicesConnector.getTargetFolders).thenReturn(Array("targetFolder"))
+      when(servicesConnector.getTargetFolders).thenReturn(Array(Constants.XML_PATH))
       val summary: PSItemSummary = mock(classOf[PSItemSummary])
       val summaries: Array[PSItemSummary] = Array[PSItemSummary](summary)
-      when(percussionServices.findFolderChildren("targetFolder")).thenReturn(summaries)
+      when(percussionServices.findFolderChildren(Constants.XML_PATH)).thenReturn(summaries)
 
       val reference: Reference = mock(classOf[Reference])
       when(reference.getName).thenReturn("faqArticle")
@@ -356,12 +417,6 @@ class ArticlesCmsServicesTest extends FeatureSpec with BeforeAndAfter {
       bodyValue.setRawData("body")
       bodyField.setPSFieldValue(Array[PSFieldValue](bodyValue))
 
-      val langField = new PSField()
-      langField.setName("language")
-      val langValue = new PSFieldValue()
-      langValue.setRawData("language")
-      langField.setPSFieldValue(Array[PSFieldValue](langValue))
-
       val rankField = new PSField()
       rankField.setName("rank")
       val rankValue = new PSFieldValue()
@@ -380,7 +435,7 @@ class ArticlesCmsServicesTest extends FeatureSpec with BeforeAndAfter {
       topicsValue.setRawData("topic1-subtopic1,subtopic2|topic2-subtopic3,subtopic4")
       topicsField.setPSFieldValue(Array(topicsValue))
 
-      when(item.getFields).thenReturn(Array[PSField](idField, linkField, titleField, bodyField, langField, rankField, updatedField, topicsField))
+      when(item.getFields).thenReturn(Array[PSField](idField, linkField, titleField, bodyField, rankField, updatedField, topicsField))
 
       when(percussionServices.loadItem(1234)).thenReturn(item)
 
@@ -390,7 +445,7 @@ class ArticlesCmsServicesTest extends FeatureSpec with BeforeAndAfter {
       assert("link" === articles(0).link)
       assert("body" === articles(0).body)
       assert("rank" === articles(0).rank)
-      assert("language" === articles(0).language)
+      assert("EN" === articles(0).language)
       assert("title" === articles(0).title)
       assert("updated" === articles(0).updated)
 
