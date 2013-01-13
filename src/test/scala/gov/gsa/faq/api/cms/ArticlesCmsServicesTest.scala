@@ -121,7 +121,7 @@ class ArticlesCmsServicesTest extends FeatureSpec with BeforeAndAfter {
       val connector: ServicesConnector = new ServicesConnector()
       services.servicesConnector = connector
       services.configureServices
-      assert(Array("//Sites/EnterpriseInvestments/faq", "//Sites/EnterpriseInvestments/faq_es") === connector.getTargetFolders)
+      assert(Array("//Sites/EnterpriseInvestments/faqArticle", "//Sites/EnterpriseInvestments/faqArticle_ES") === connector.getTargetFolders)
     }
 
     scenario("properties file exists") {
@@ -130,7 +130,7 @@ class ArticlesCmsServicesTest extends FeatureSpec with BeforeAndAfter {
       val connector: ServicesConnector = new ServicesConnector()
       services.servicesConnector = connector
       services.configureServices
-      assert(Array("//Sites/EnterpriseInvestments/faq", "//Sites/EnterpriseInvestments/faq_es") === connector.getTargetFolders)
+      assert(Array("//Sites/EnterpriseInvestments/faqArticle", "//Sites/EnterpriseInvestments/faqArticle_ES") === connector.getTargetFolders)
     }
   }
 
@@ -287,9 +287,6 @@ class ArticlesCmsServicesTest extends FeatureSpec with BeforeAndAfter {
     scenario("load 1 item from the CMS and return a single Article") {
 
       val item = makeItem
-      val folders = new PSItemFolders()
-      folders.setPath(Constants.XML_PATH)
-      when(item.getFolders).thenReturn(Array(folders))
 
       when(percussionServices.loadItem(2l)).thenReturn(item)
 
@@ -299,7 +296,7 @@ class ArticlesCmsServicesTest extends FeatureSpec with BeforeAndAfter {
       assert(article.link === "link")
       assert(article.rank === "rank")
       assert(article.title === "title")
-      assert(article.language === "EN")
+      article.language should be (null)
       assert(article.updated === "updated")
       assert(article.topics === new TopicsConverter().convertField(makeTopicsField))
 
@@ -318,10 +315,6 @@ class ArticlesCmsServicesTest extends FeatureSpec with BeforeAndAfter {
 
       val item: PSItem = mock(classOf[PSItem])
 
-      val folders = new PSItemFolders()
-      folders.setPath(Constants.XML_PATH_ES)
-      when(item.getFolders).thenReturn(Array(folders))
-
       when(item.getFields).thenReturn(Array[PSField](idField))
       when(item.getId).thenReturn(2l)
 
@@ -329,35 +322,8 @@ class ArticlesCmsServicesTest extends FeatureSpec with BeforeAndAfter {
 
       val article = services.getArticle(2l)
       assert(article.id === "id")
-      assert(article.language === "ES")
       article.topics should be(null)
-
-      verify(percussionServices).login()
-      verify(servicesConnector).configureServices(services, Constants.DATA_DIR, Constants.SERVICES_PROPS_NAME)
-      verify(percussionServices).logout()
-    }
-
-    scenario("load 1 item from the CMS that is not in one of the target folders") {
-
-      val idField = new PSField()
-      idField.setName("faq_id")
-      val idValue = new PSFieldValue()
-      idValue.setRawData("id")
-      idField.setPSFieldValue(Array[PSFieldValue](idValue))
-
-      val item: PSItem = mock(classOf[PSItem])
-
-      val folders = new PSItemFolders()
-      folders.setPath("hamburger")
-      when(item.getFolders).thenReturn(Array(folders))
-
-      when(item.getFields).thenReturn(Array[PSField](idField))
-      when(item.getId).thenReturn(2l)
-
-      when(percussionServices.loadItem(2l)).thenReturn(item)
-
-      val article = services.getArticle(2l)
-      article should be(null)
+      article.language should be (null)
 
       verify(percussionServices).login()
       verify(servicesConnector).configureServices(services, Constants.DATA_DIR, Constants.SERVICES_PROPS_NAME)
@@ -379,10 +345,6 @@ class ArticlesCmsServicesTest extends FeatureSpec with BeforeAndAfter {
 
       val item: PSItem = mock(classOf[PSItem])
 
-      val folders = new PSItemFolders()
-      folders.setPath(Constants.XML_PATH_ES)
-      when(item.getFolders).thenReturn(Array(folders))
-
       when(item.getFields).thenReturn(Array[PSField](idField))
       when(item.getId).thenReturn(2l)
 
@@ -402,10 +364,10 @@ class ArticlesCmsServicesTest extends FeatureSpec with BeforeAndAfter {
 
     scenario("load 1 items from the CMS and return a List of 1 Articles") {
 
-      when(servicesConnector.getTargetFolders).thenReturn(Array(Constants.XML_PATH))
+      when(servicesConnector.getTargetFolders).thenReturn(Array("//ham"))
       val summary: PSItemSummary = mock(classOf[PSItemSummary])
       val summaries: Array[PSItemSummary] = Array[PSItemSummary](summary)
-      when(percussionServices.findFolderChildren(Constants.XML_PATH)).thenReturn(summaries)
+      when(percussionServices.findFolderChildren("//ham")).thenReturn(summaries)
 
       val reference: Reference = mock(classOf[Reference])
       when(reference.getName).thenReturn("gsaArticle")
@@ -479,7 +441,7 @@ class ArticlesCmsServicesTest extends FeatureSpec with BeforeAndAfter {
       assert("link" === articles(0).link)
       assert("<![CDATA[body]]" === articles(0).body)
       assert("rank" === articles(0).rank)
-      assert("EN" === articles(0).language)
+      articles(0).language should be (null)
       assert("title" === articles(0).title)
       assert("updated" === articles(0).updated)
 

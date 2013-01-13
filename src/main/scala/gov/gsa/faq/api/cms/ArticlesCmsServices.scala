@@ -102,59 +102,35 @@ class ArticlesCmsServices extends PercussionContentServices with LogHelper {
   def getArticle(id: Long): Article = {
     configureServices
 
-    def getLanguage(psItem: PSItem): String = {
-      val language = {
-        if (psItem != null) {
-          val targetFolder = psItem.getFolders()(0).getPath
-          if (targetFolder == Constants.XML_PATH) {
-            "EN"
-          } else if (targetFolder == Constants.XML_PATH_ES) {
-            "ES"
-          } else {
-            null
-          }
-        } else {
-          null
-        }
-      }
-      language
-    }
-
     try {
       services.login()
 
       val psItem = services.loadItem(id)
-      val language: String = getLanguage(psItem)
 
-      if (language != null) {
-        val article: Article = new Article()
-        article.language = language
-        val fields = psItem.getFields
-        for (field <- fields) {
-          val value = field.getPSFieldValue
-          if (value != null && value.length > 0) {
-            val data: String = value(0).getRawData
-            if (field.getName == "faq_id") {
-              article.id = data
-            } else if (field.getName == "faq_src_link") {
-              article.link = data
-            } else if (field.getName == "text") {
-              article.body = "<![CDATA[" + data + "]]"
-            } else if (field.getName == "faq_rank") {
-              article.rank = data
-            } else if (field.getName == "faq_updated") {
-              article.updated = data
-            } else if (field.getName == "faq_src_title") {
-              article.title = data
-            } else if (field.getName == "faq_topic_subtopic") {
-              article.topics = new TopicsConverter().convertField(field)
-            }
+      val article: Article = new Article()
+      val fields = psItem.getFields
+      for (field <- fields) {
+        val value = field.getPSFieldValue
+        if (value != null && value.length > 0) {
+          val data: String = value(0).getRawData
+          if (field.getName == "faq_id") {
+            article.id = data
+          } else if (field.getName == "faq_src_link") {
+            article.link = data
+          } else if (field.getName == "text") {
+            article.body = "<![CDATA[" + data + "]]"
+          } else if (field.getName == "faq_rank") {
+            article.rank = data
+          } else if (field.getName == "faq_updated") {
+            article.updated = data
+          } else if (field.getName == "faq_src_title") {
+            article.title = data
+          } else if (field.getName == "faq_topic_subtopic") {
+            article.topics = new TopicsConverter().convertField(field)
           }
         }
-        article
-      } else {
-        null
       }
+      article
     } catch {
       case e: Exception => {
         logger.error(e.getMessage)
@@ -175,15 +151,8 @@ class ArticlesCmsServices extends PercussionContentServices with LogHelper {
 
     configureServices
     val targetFolders = servicesConnector.getTargetFolders()
-    for (targetFolder <- targetFolders) {
 
-      val language = {
-        if (targetFolder == Constants.XML_PATH) {
-          "EN"
-        } else {
-          "ES"
-        }
-      }
+    for (targetFolder <- targetFolders) {
 
       try {
         services.login()
@@ -207,7 +176,6 @@ class ArticlesCmsServices extends PercussionContentServices with LogHelper {
             }
             if (contentTypeName(summary) == "gsaArticle") {
               val article: Article = new Article()
-              article.language = language
               val psItem = services.loadItem(summary.getId)
               val fields = psItem.getFields
               for (field <- fields) {
