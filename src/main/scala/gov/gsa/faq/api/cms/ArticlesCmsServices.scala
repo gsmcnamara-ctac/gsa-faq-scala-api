@@ -19,7 +19,10 @@ class ArticlesCmsServices extends PercussionContentServices with LogHelper {
   def createArticle(article: Article): String = {
 
     var fields = mapArticleToFields(article)
-    //    fields += ("sys_title" -> article.title)
+    fields += ("sys_title" -> article.title)
+    fields += ("top_link" -> "No")
+    fields += ("title_style" -> "Hidden")
+    fields += ("pagetitle" -> article.title)
 
     configureServices
     val targetFolder = {

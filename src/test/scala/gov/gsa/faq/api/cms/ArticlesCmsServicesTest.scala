@@ -45,6 +45,10 @@ class ArticlesCmsServicesTest extends FeatureSpec with BeforeAndAfter {
       fields += ("faq_rank" -> "rank")
       fields += ("faq_updated" -> "updated")
       fields += ("faq_topic_subtopic" -> "topic1-subtopic1,subtopic2|topic2-subtopic3,subtopic4")
+      fields += ("sys_title" -> "title")
+      fields += ("top_link" -> "No")
+      fields += ("title_style" -> "Hidden")
+      fields += ("pagetitle" -> "title")
       fields
     }
 
@@ -143,6 +147,10 @@ class ArticlesCmsServicesTest extends FeatureSpec with BeforeAndAfter {
       fields += ("faq_rank" -> "rank")
       fields += ("faq_updated" -> "updated")
       fields += ("faq_topic_subtopic" -> "topic1-subtopic1,subtopic2|topic2-subtopic3,subtopic4")
+      fields += ("sys_title" -> "title")
+      fields += ("top_link" -> "No")
+      fields += ("title_style" -> "Hidden")
+      fields += ("pagetitle" -> "title")
       fields
     }
 
