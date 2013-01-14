@@ -115,8 +115,10 @@ trait ArticlesResource extends RestResourceUtil with RestAPI with LogHelper {
                 result.cmsId = id
               }
             }
-            results += result
+          } else {
+            result.result = "article with id="+articleId+" does not exist"
           }
+          results += result
         }
       }
       Response.ok().entity(new Results(results)).build()

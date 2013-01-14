@@ -169,7 +169,11 @@ class ArticlesResourceTest extends FeatureSpec with BeforeAndAfter {
       when(dao.getArticle("999999")).thenReturn(null)
 
       val response = articlesResource.updateCmsArticles(dao, "999999")
-      assert(0 === response.getEntity.asInstanceOf[Results].result.size())
+      val results: java.util.List[Result] = response.getEntity.asInstanceOf[Results].result
+      assert(1 === results.size)
+      assert("999999"===results(0).result)
+      results(0).operation should be (null)
+      assert("article with id=999999 does not exist"===results(0).result)
     }
   }
 }
