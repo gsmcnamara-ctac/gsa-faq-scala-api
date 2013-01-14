@@ -85,17 +85,18 @@ class ArticlesResourceTest extends FeatureSpec with BeforeAndAfter {
   feature("getSelectedCmsArticles") {
 
     scenario("get 2 artciles from the cms, one exists and one does not") {
-      when(cmsIdMapper.get("123")).thenReturn(null)
-      when(cmsIdMapper.get("456")).thenReturn("654")
+      when(cmsIdMapper.get("1001")).thenReturn(null)
+      when(cmsIdMapper.get("9666")).thenReturn("654")
 
       val article = new Article()
       article.id = "wow"
       when(cmsServices.getArticle(654l)).thenReturn(article)
 
-      val response = articlesResource.getSelectedCmsArticles("123|456")
+      val response = articlesResource.getSelectedCmsArticles("1001|9666")
       val articles = response.getEntity().asInstanceOf[Articles].article
       assert(1 === articles.size)
       assert("wow" === articles(0).id)
+      assert("EN"===articles(0).language)
     }
   }
 

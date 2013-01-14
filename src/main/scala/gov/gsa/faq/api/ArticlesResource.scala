@@ -63,8 +63,10 @@ trait ArticlesResource extends RestResourceUtil with RestAPI with LogHelper {
       for (articleId <- ids) {
         val cmsId = cmsIdMapper.get(articleId)
         if (cmsId != null) {
+          val faqDao = new FaqDao(InMemoryHSQLDatabase.getInstance(new FaqDatabase()).getDataSource())
           val article = cmsServices.getArticle(cmsId.toLong)
           if (article != null) {
+            article.language = faqDao.getArticle(articleId).language
             articleList += article
           }
         }

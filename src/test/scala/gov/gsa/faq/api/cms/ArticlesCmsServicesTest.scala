@@ -296,7 +296,6 @@ class ArticlesCmsServicesTest extends FeatureSpec with BeforeAndAfter {
       assert(article.link === "link")
       assert(article.rank === "rank")
       assert(article.title === "title")
-      article.language should be (null)
       assert(article.updated === "updated")
       assert(article.topics === new TopicsConverter().convertField(makeTopicsField))
 
@@ -323,7 +322,6 @@ class ArticlesCmsServicesTest extends FeatureSpec with BeforeAndAfter {
       val article = services.getArticle(2l)
       assert(article.id === "id")
       article.topics should be(null)
-      article.language should be (null)
 
       verify(percussionServices).login()
       verify(servicesConnector).configureServices(services, Constants.DATA_DIR, Constants.SERVICES_PROPS_NAME)
