@@ -96,25 +96,27 @@ trait ArticlesResource extends RestResourceUtil with RestAPI with LogHelper {
           val result = new Result()
           result.id = articleId
           val article = faqDao.getArticle(articleId)
-          val cmsId = cmsIdMapper.get(article.id)
-          if (cmsId == null) {
-            result.operation = "insert"
-            val _cmsId = cmsServices.createArticle(article)
-            result.result = if (_cmsId == null) "failure" else "success"
-            result.cmsId = _cmsId
-            cmsIdMapper.put(article.id, _cmsId)
-          } else {
-            result.operation = "update"
-            val id = cmsServices.updateArticle(article, cmsId)
-            result.result = if (id != null) "success" else "failure"
-            if (id == null) {
-              logger.error("update of article with id=" + article.id + " failed")
+          if (article!=null) {
+            val cmsId = cmsIdMapper.get(article.id)
+            if (cmsId == null) {
+              result.operation = "insert"
+              val _cmsId = cmsServices.createArticle(article)
+              result.result = if (_cmsId == null) "failure" else "success"
+              result.cmsId = _cmsId
+              cmsIdMapper.put(article.id, _cmsId)
             } else {
-              cmsIdMapper.put(article.id, id)
-              result.cmsId = id
+              result.operation = "update"
+              val id = cmsServices.updateArticle(article, cmsId)
+              result.result = if (id != null) "success" else "failure"
+              if (id == null) {
+                logger.error("update of article with id=" + article.id + " failed")
+              } else {
+                cmsIdMapper.put(article.id, id)
+                result.cmsId = id
+              }
             }
+            results += result
           }
-          results += result
         }
       }
       Response.ok().entity(new Results(results)).build()

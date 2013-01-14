@@ -162,5 +162,14 @@ class ArticlesResourceTest extends FeatureSpec with BeforeAndAfter {
       response = articlesResource.updateCmsArticles(null, "")
       assert(0 === response.getEntity.asInstanceOf[Results].result.size())
     }
+
+    scenario("article doesn't exists in database") {
+
+      val dao = mock(classOf[FaqDao])
+      when(dao.getArticle("999999")).thenReturn(null)
+
+      val response = articlesResource.updateCmsArticles(dao, "999999")
+      assert(0 === response.getEntity.asInstanceOf[Results].result.size())
+    }
   }
 }
