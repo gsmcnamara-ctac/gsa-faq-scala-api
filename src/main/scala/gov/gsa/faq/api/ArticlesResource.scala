@@ -27,9 +27,9 @@ trait ArticlesResource extends RestResourceUtil with RestAPI with LogHelper {
   @GET
   @ApiOperation(value = "Get all Aritcles", notes = "")
   @Path("/articles")
-  override def getResource(@ApiParam(value = "Filter by query param. Ex. \"title::Social Security Administration (SSA)|rank:gt:10.1\"", required = false) @QueryParam("query_filter") queryFilter: String,
-                           @ApiParam(value = "Limit results by property name. Ex. \"id|title|rank\"", required = false) @QueryParam("result_filter") resultFilter: String,
-                           @ApiParam(value = "Sort by property name. Use '-' for descending. Ex. \"id|-rank\"", required = false) @QueryParam("sort") sortParam: String,
+  override def getResource(@ApiParam(value = "Filter by query param. Ex. \"id::1001\" Accepted query_filter(s) are id|title|body|rank|topic|subtopic|language", required = false) @QueryParam("query_filter") queryFilter: String,
+                           @ApiParam(value = "Limit results by property name. Ex. \"id|title|rank\" Accepted result_filter(s) are id|link|title|body|rank|updated|topic|language", required = false) @QueryParam("result_filter") resultFilter: String,
+                           @ApiParam(value = "Sort by property name. Use '-' for descending. Ex. \"id|-rank\" Accepted sort(s) are id|link|title|rank|updated|language", required = false) @QueryParam("sort") sortParam: String,
                            @ApiParam(value = "Limit results by range. Ex. \"items=1-101\"", required = false) @HeaderParam("X-Range") rangeHeader: String): Response = {
 
     try {
@@ -54,7 +54,7 @@ trait ArticlesResource extends RestResourceUtil with RestAPI with LogHelper {
   }
 
   @GET
-  @ApiOperation(value = "Insert new articles or update existing article by id", notes = "")
+  @ApiOperation(value = "Get CMS articles by id", notes = "")
   @Path("/articles/cms/get")
   def getSelectedCmsArticles(@ApiParam(value = "Article ids. Ex. \"1234|4567\"", required = true) @QueryParam("article_ids") articleIds: String): Response = {
     val articleList = new ListBuffer[Article]()
@@ -76,7 +76,7 @@ trait ArticlesResource extends RestResourceUtil with RestAPI with LogHelper {
   }
 
   @GET
-  @ApiOperation(value = "Insert new articles or update existing article by id", notes = "")
+  @ApiOperation(value = "Insert new CMS articles or update existing CMS articles by id", notes = "")
   @Path("/articles/cms/update")
   def updateSelectedCmsArticles(@ApiParam(value = "Article ids. Ex. \"1234|4567\"", required = true) @QueryParam("article_ids") articleIds: String): Response = {
 

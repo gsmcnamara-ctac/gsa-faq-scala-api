@@ -49,7 +49,8 @@
 		<init-param>
 			<param-name>swagger.api.basepath</param-name>
 			<!-- <param-value>http://localhost:9090/faqapi</param-value> -->
-			<param-value>http://ec2-174-129-106-46.compute-1.amazonaws.com:8080/faqapi</param-value>
+			<!-- <param-value>http://ec2-174-129-106-46.compute-1.amazonaws.com:8080/faqapi</param-value> -->
+			<param-value>http://172.22.75.16:8080/faqapi</param-value>
 		</init-param>
 		<load-on-startup>1</load-on-startup>
 	</servlet>
