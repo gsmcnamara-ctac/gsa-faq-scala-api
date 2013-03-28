@@ -17,6 +17,8 @@ import scala.collection.JavaConversions._
 import org.scalatest.matchers.ShouldMatchers._
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
+import security.AuthFilter
+import gov.gsa.rest.api.exception.UnauthorizedException
 
 @RunWith(classOf[JUnitRunner])
 class ArticlesResourceTest extends FeatureSpec with BeforeAndAfter {
@@ -27,6 +29,7 @@ class ArticlesResourceTest extends FeatureSpec with BeforeAndAfter {
   val rangeFinder = mock(classOf[RangeFinder])
   val cmsServices = mock(classOf[ArticlesCmsServices])
   val cmsIdMapper = mock(classOf[CmsIdMapper])
+  val filter = mock(classOf[AuthFilter])
 
   before {
 
@@ -39,7 +42,8 @@ class ArticlesResourceTest extends FeatureSpec with BeforeAndAfter {
     articlesResource.rangeFinder = rangeFinder
     articlesResource.cmsServices = cmsServices
     articlesResource.cmsIdMapper = cmsIdMapper
-    reset(uriInfo, request, rangeFinder, cmsServices, cmsIdMapper)
+    articlesResource.authFilter = filter
+    reset(uriInfo, request, rangeFinder, cmsServices, cmsIdMapper, filter)
 
     when(uriInfo.getRequestUri()).thenReturn(new URI("http://pants.nation.org:8080/usagovapi/contacts.json/contacts?pizza=cheese"))
     when(request.getRemoteAddr()).thenReturn("hamsandwich.com")
@@ -154,6 +158,19 @@ class ArticlesResourceTest extends FeatureSpec with BeforeAndAfter {
       assert("123" === results(0).id)
       assert("insert" === results(0).operation)
       assert("failure" === results(0).result)
+    }
+
+    scenario("update not authorized") {
+
+      articlesResource.authFilter = new AuthFilter()
+      articlesResource.request = null
+      try {
+        articlesResource.updateSelectedCmsArticles("1234|4321")
+        fail()
+      }
+      catch {
+        case e: UnauthorizedException => assert("Unauthorized" === e.getMessage)
+      }
     }
 
     scenario("article ids string is empty or null") {

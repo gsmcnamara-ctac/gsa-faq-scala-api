@@ -5,7 +5,6 @@ import com.wordnik.swagger.core.util.RestResourceUtil
 import dao.{FaqDatabase, FaqDao}
 import gov.gsa.rest.api.{RangeFinder, RestAPI}
 import javax.servlet.http.HttpServletRequest
-import javax.ws.rs.core.{UriInfo, Context, Response, MediaType}
 import com.wordnik.swagger.annotations.{Api, ApiParam, ApiOperation}
 import gov.gsa.rest.api.dao.InMemoryHSQLDatabase
 import collection.mutable.ListBuffer
@@ -14,7 +13,9 @@ import gov.gsa.rest.api.exception.ApiException
 import scala.Array
 import com.wordnik.swagger.jaxrs.Help
 import javax.ws.rs._
+import core._
 import scala.collection.JavaConversions._
+import security.AuthFilter
 
 trait ArticlesResource extends RestResourceUtil with RestAPI with LogHelper {
 
@@ -23,6 +24,7 @@ trait ArticlesResource extends RestResourceUtil with RestAPI with LogHelper {
   var rangeFinder: RangeFinder = new RangeFinder()
   var cmsServices: ArticlesCmsServices = new ArticlesCmsServices()
   var cmsIdMapper: CmsIdMapper = new CmsIdMapper()
+  var authFilter: AuthFilter = new AuthFilter()
 
   @GET
   @ApiOperation(value = "Get all Aritcles", notes = "")
@@ -75,10 +77,12 @@ trait ArticlesResource extends RestResourceUtil with RestAPI with LogHelper {
     Response.ok().entity(new Articles(articleList)).build()
   }
 
-  @GET
+  @POST
   @ApiOperation(value = "Insert new CMS articles or update existing CMS articles by id", notes = "")
   @Path("/articles/cms/update")
   def updateSelectedCmsArticles(@ApiParam(value = "Article ids. Ex. \"1234|4567\"", required = true) @QueryParam("article_ids") articleIds: String): Response = {
+
+    authFilter.filter(request)
 
     val faqDao = new FaqDao(InMemoryHSQLDatabase.getInstance(new FaqDatabase()).getDataSource())
     updateCmsArticles(faqDao, articleIds)

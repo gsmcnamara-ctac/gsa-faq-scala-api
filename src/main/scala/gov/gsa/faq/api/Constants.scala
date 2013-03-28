@@ -2,7 +2,9 @@ package gov.gsa.faq.api
 
 object Constants {
 
-  val DATA_DIR = "/opt/jboss-ews-1.0/tomcat6/data/faqapi"
+  val TOMCAT_DIR = "/opt/jboss-ews-1.0/tomcat6"
+  val TOMCAT_USERS = TOMCAT_DIR + "/conf/tomcat-users.xml"
+  val DATA_DIR = TOMCAT_DIR + "/data/faqapi"
   val LOG_PATH = DATA_DIR + "/logs/faqapi.log"
   val XML_PATH = DATA_DIR + "/FAQ_EN.xml"
   val XML_PATH_ES = DATA_DIR + "/FAQ_ES.xml"
