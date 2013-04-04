@@ -1,5 +1,273 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html>
-<body>
-<img src="images/00139_pinchbee_1920x1200.jpg">
-</body>
+	<head>
+		<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+		
+		<title></title>
+		<style type="text/css" title="currentStyle">
+			@import "css/demo_page.css";
+			@import "css/demo_table.css";
+			@import "css/login.css";			
+		</style>
+
+		
+		<script type="text/javascript" language="javascript" src="js/jquery.js"></script>
+		<script type="text/javascript" language="javascript" src="js/jquery.dataTables.js"></script>
+
+		<script type="text/javascript" charset="utf-8">
+			var oTable;
+			var ResultsList = [];
+			
+
+			$(document).ready(function() {
+			
+			$("#query").click(function() {
+
+
+
+				var articles = null;
+
+				// Get the Table Data from REST Service
+
+				/* LOAD FUNCTIONS ---------------------------------------------------------- */
+				// Make the AJAX call
+				querystring = "";
+				if ($("#id1").val()) {
+					querystring = querystring + "id::" + $("#id1").val() + "|";
+				}
+				if ($("#title1").val()) {
+					querystring = querystring + "title::*" + $("#title1").val() + "*|";
+				}
+				if ($("#body1").val()) {
+					querystring = querystring + "body::*" + $("#body1").val() + "*|";
+				}
+				if ($("#rank1").val()) {
+					querystring = querystring + "body::" + $("#body1").val() + "|";
+				}
+				if ($("#topic1").val()) {
+					querystring = querystring + "topic::*" + $("#topic1").val() + "*|";
+				}
+				if ($("#subtopic1").val()) {
+					querystring = querystring + "subtopic::" + $("#subtopic1").val() + "|";
+				}
+				if ($("#language1").val()) {
+					querystring = querystring + "language::" + $("#language1").val() + "|";
+				}
+				querystring = querystring.slice(0,-1);
+				$("body").addClass("loading");
+				$.getJSON("http://staging.usa.gov/faqapi/articles.json/articles/?query_filter=" + querystring, function(data) {
+				$("body").removeClass("loading");
+				var table_data = [];
+				$.each(data.article, function(id, thing){
+					var update = new Date(thing.updated.slice(0,thing.updated.length-3));
+					update = update.toLocaleDateString()
+					var rank = parseFloat(thing.rank).toFixed(1);
+					var row = [thing.id, thing.title, thing.body.substring(thing.body.indexOf('<body>')+6,thing.body.indexOf('<body>')+81), rank, update];
+  					var topic_combo = "";
+  					$.each(thing.topics.topic, function(id, topic){
+  						var topic_name = topic.name;
+  						if (topic.subtopics) {
+	  						$.each(topic.subtopics.subtopic, function(id, sub_topic) {
+	  							topic_combo = topic_combo + "," + topic_name + "(" + sub_topic + ")";
+	  						});
+		  				}
+	  					else {
+	  						topic_combo = topic_combo + "," + topic_name;
+	  					}
+	  				});
+						
+					row.push(topic_combo.slice(1)); 
+					row.push(thing.language);
+					table_data.push(row);
+  					});	
+					articles = table_data;
+				});
+
+				oTable = $('#example').dataTable( {
+					"bDestroy": true,
+					"bPaginate": true,
+					"aaData" : articles,
+					"aoColumns" : [
+					{ "sTitle": "ID"},
+					{ "sTitle": "Title"},
+					{ "sTitle": "Article"},
+					{ "sTitle": "Rank"},
+					{ "sTitle": "Updated"},
+					{ "sTitle": "Topic List"},
+					{ "sTitle": "Language"}
+					]
+				} );
+
+				// Since we use pagination the table rows don't exist till we look at them 
+				// So we must use this delegate construct to encapsualte all new rows and hook them.
+				$("#example tbody").on('click',  'tr', function(event) {
+	        		$(this).toggleClass('row_selected');
+				});
+
+				$("tfoot input").keyup( function () {
+					/* Filter on the column (the index) of this element */
+					oTable.fnFilter( this.value, $("tfoot input").index(this) );
+				} );
+				
+				
+				/*
+				 * Support functions to provide a little bit of 'user friendlyness' to the textboxes in 
+				 * the footer
+				 */
+				$("tfoot input").each( function (i) {
+					asInitVals[i] = this.value;
+				} );
+				
+				$("tfoot input").focus( function () {
+					if ( this.className == "search_init" )
+					{
+						this.className = "";
+						this.value = "";
+					}
+				} );
+				
+				$("tfoot input").blur( function (i) {
+					if ( this.value == "" )
+					{
+						this.className = "search_init";
+						this.value = asInitVals[$("tfoot input").index(this)];
+					}
+				} );
+
+			    return false; // avoid to execute the actual submit of the form.
+			});
+				//also not hooked up correctly here.
+//				$(document).on({
+//				    ajaxStart: function() { 
+//				        $(this).addClass("loading"); 
+//				    },
+//				    ajaxStop: function() { 
+//				        $(this).removeClass("loading"); 
+//				    }    
+//				});
+				
+//				$(document).ajaxStart(function() {
+//			        $(this).addClass("loading"); 
+//				 });
+
+//				$(document).ajaxStop(function() {
+//			        $(this).addClass("loading"); 
+//				 });
+
+				$.ajaxSetup({
+				   async: false,
+				   beforeSend: function() {
+  					   $("div.modal").show();
+  					},
+  					complete: function(){
+     					$("div.modal").hide();
+  					},
+  					success: function() {}
+				 });
+
+
+				$("#article_transfer").click(function() {
+					if (oTable) {
+						var ResultMessage = "";
+						$.each(oTable.$('tr.row_selected'), function(id, rez){
+							ResultMessage += ResultMessage + "Working on " +  rez.cells[0].innerHTML + "<br>";
+							$("#results").text(ResultMessage);
+//							alert("hello");
+							$.getJSON("http://staging.usa.gov/faqapi/articles.json/articles/cms/update?article_ids=" + rez.cells[0].innerHTML, function(data) {
+								$.each(data.result, function(id, resp){
+									alert("Status: Operation - " + resp.operation + " Result - " + resp.result);
+								});
+							});
+							ResultMessage += ResultMessage + "Finished " +  rez.cells[0].innerHTML + "<br>";
+							$("#results").text(ResultMessage);
+						});
+					}
+				} );
+
+				return false;
+	
+			} );
+	
+
+
+
+
+
+			var asInitVals = new Array();
+		
+		
+
+		</script>		
+		<style></style>
+		
+	</head>
+	<body id="dt_example">
+	
+	
+	
+		<div id="container">
+			<p>Enter Values into the Query fields to limit the article set. No Entry will retrieve all articles (long process).</p>
+			<div id="dynamic">
+			
+				<fieldset>
+					<legend>
+						Article Query Form
+					</legend>
+					<label for="id1">Id</label>
+					<input id="id1" name="id1" type="text" value="" />
+					<label for="title1">Title</label>
+					<input id="title1" name="title1" type="text" value="" />
+					<label for="body1">Body</label>
+					<input id="body1" name="body1" type="text" value="" />
+					<label for="rank1">Rank</label>
+					<input id="rank1" name="rank1" type="text" value="" />
+					<label for="topic1">Topic</label>
+					<input id="topic1" name="topic1" type="text" value="" />
+					<label for="subtopic1">Subtopic</label>
+					<input id="subtopic1" name="subtopic1" type="text" value="" />
+					<label for="language1">Language</label>
+					<input id="language1" name="language1" type="text" value="" />
+					<div class="clearer"></div>
+				</fieldset>
+				<div style="text-align:right; padding-bottom:1em;">
+					<button type="submit" id="query">Submit Query</button>
+				</div>			
+		<hr>
+<table cellpadding="0" cellspacing="0" border="0" class="display" id="example">
+	<thead>
+		<tr>
+			<th width="5%"></th>
+			<th width="15%"></th>
+			<th width="50%"></th>
+			<th width="5%"></th>
+			<th width="5%"></th>			
+			<th width="15%"></th>			
+			<th width="5%"></th>			
+		</tr>
+	</thead>
+	<tbody>
+		
+	</tbody>
+	<tfoot>
+		<tr>
+			<th><input type="text" name="search_id" value="Search ID" class="search_init" /></th>
+			<th><input type="text" name="search_title" value="" class="search_init" /></th>
+			<th><input type="text" name="search_article" value="" class="search_init" /></th>
+			<th><input type="text" name="search_rank" value="" class="search_init" /></th>
+			<th><input type="text" name="search_updated" value="" class="search_init" /></th>
+			<th><input type="text" name="search_topiclist" value="" class="search_init" /></th>
+			<th><input type="text" name="search_language" value="" class="search_init" /></th>
+		</tr>
+	</tfoot>	
+</table>
+
+			</div>
+			<div class="spacer"></div>
+	<div class="results">Results will display here.</div>
+	<div style="text-align:right; padding-bottom:1em;">
+		<button type="button" id="article_transfer">Transfer Article</button>
+	</div>			
+
+	<div class="modal"><!-- Place at bottom of page --></div>
+	</body>
 </html>
