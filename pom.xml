@@ -48,7 +48,7 @@
         <dependency>
             <groupId>gov.gsa</groupId>
             <artifactId>rest-api-base</artifactId>
-            <version>1.7-SNAPSHOT</version>
+            <version>1.7</version>
         </dependency>
         <dependency>
             <groupId>commons-beanutils</groupId>
