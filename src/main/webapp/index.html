@@ -55,7 +55,7 @@
 				}
 				querystring = querystring.slice(0,-1);
 				$("body").addClass("loading");
-				$.getJSON("http://staging.usa.gov/faqapi/articles.json/articles/?query_filter=" + querystring, function(data) {
+				$.getJSON("http://staging.usa.gov/faqapi/api/articles.json/articles/?query_filter=" + querystring, function(data) {
 				$("body").removeClass("loading");
 				var table_data = [];
 				$.each(data.article, function(id, thing){
@@ -173,7 +173,7 @@
 							ResultMessage += ResultMessage + "Working on " +  rez.cells[0].innerHTML + "<br>";
 							$("#results").text(ResultMessage);
 //							alert("hello");
-							$.getJSON("http://staging.usa.gov/faqapi/articles.json/articles/cms/update?article_ids=" + rez.cells[0].innerHTML, function(data) {
+							$.getJSON("http://staging.usa.gov/faqapi/api/articles.json/articles/cms/update?article_ids=" + rez.cells[0].innerHTML, function(data) {
 								$.each(data.result, function(id, resp){
 									alert("Status: Operation - " + resp.operation + " Result - " + resp.result);
 								});
